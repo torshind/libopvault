@@ -1,0 +1,6 @@
+project(libopvault)
+cmake_minimum_required(VERSION 2.8)
+include_directories(include)
+link_directories()
+add_subdirectory(src)
+add_subdirectory(test)
