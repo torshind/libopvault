@@ -16,6 +16,7 @@ This project depends on the following third-party libraries:
 
 * cryptopp: https://www.cryptopp.com/
 * JSON for Modern C++: https://nlohmann.github.io/json/
+* SQLite: https://www.sqlite.org/
 
 A sample OPVault file to run the test application is provided by AgileBits:
 https://cache.agilebits.com/security-kb/
