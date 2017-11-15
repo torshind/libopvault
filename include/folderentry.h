@@ -30,15 +30,10 @@ SOFTWARE.
 
 namespace OPVault {
 
-struct FolderEntry : BaseEntry {
-    int created;
-    std::string o;
-    int tx;
-    int updated;
-    std::string uuid;
-
-    std::string decrypted_overview;
-
+class FolderEntry : BaseEntry {
+    friend class Vault;
+    friend class Folder;
+public:
     FolderEntry() {}
 
     FolderEntry(int _created,
@@ -53,7 +48,19 @@ struct FolderEntry : BaseEntry {
         uuid(_uuid)
     {}
 
+    std::string get_overview() { return o; }
+    std::string get_uuid() { return uuid; }
+
     void decrypt_overview();
+
+private:
+    int created;
+    std::string o;
+    int tx;
+    int updated;
+    std::string uuid;
+
+    std::string decrypted_overview;
 };
 
 }

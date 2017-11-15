@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
     }
 
     for(vector<FolderEntry>::iterator it1=folders.begin(); it1!=folders.end(); ++it1) {
-        cout << "Folder " << it1->uuid << endl;
+        cout << "Folder " << it1->get_uuid() << endl;
         items.clear();
-        vault.get_items_folder(it1->uuid, items);
+        vault.get_items_folder(it1->get_uuid(), items);
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
             cout << "Item " << it2->get_uuid() << endl;
             it2->decrypt_overview();
