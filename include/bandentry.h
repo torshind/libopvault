@@ -32,22 +32,13 @@ SOFTWARE.
 
 namespace OPVault {
 
-struct BandEntry : BaseEntry {
-    int created;
-    std::string o;
-    int tx;
-    int updated;
-    std::string uuid;
-    std::string category;
-    std::string d;
-    std::string folder;
-    std::string hmac;
-    std::string k;
+class BandEntry : BaseEntry {
+    friend class Vault;
+    friend class Band;
 
-    std::string decrypted_overview;
-    std::string decrypted_data;
-
+public:
     BandEntry() {}
+
     BandEntry(int _created,
               std::string _o,
               int _tx,
@@ -70,10 +61,30 @@ struct BandEntry : BaseEntry {
         k(_k)
     {}
 
+    std::string get_overview() { return o; }
+    std::string get_uuid() { return uuid; }
+    std::string get_category() { return category; }
+    std::string get_data() { return d; }
+    std::string get_folder() { return folder; }
+
     void decrypt_data();
     void decrypt_overview();
 
 private:
+    int created;
+    std::string o;
+    int tx;
+    int updated;
+    std::string uuid;
+    std::string category;
+    std::string d;
+    std::string folder;
+    std::string hmac;
+    std::string k;
+
+    std::string decrypted_overview;
+    std::string decrypted_data;
+
     void decrypt_key(std::string &key);
 };
 

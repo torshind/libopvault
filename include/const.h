@@ -76,6 +76,9 @@ const char SQL_CREATE_ITEMS[] = "CREATE TABLE Items (" \
 const char SQL_INSERT_ITEMS_ENTRY[] = "INSERT INTO Items (created, o, tx, updated, uuid, category, d, folder, hmac, k) "  \
                                       "VALUES (%d, '%s', %d, %d, '%s', '%s', '%s', '%s', '%s', '%s');";
 
+const char SQL_REPLACE_ITEMS_ENTRY[] = "INSERT OR REPLACE INTO Items (created, o, tx, updated, uuid, category, d, folder, hmac, k) "  \
+                                       "VALUES (%d, '%s', %d, %d, '%s', '%s', '%s', '%s', '%s', '%s');";
+
 const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
                                   "created  INT  NOT NULL," \
                                   "o        TEXT NOT NULL," \

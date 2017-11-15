@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         items.clear();
         vault.get_items_folder(it1->uuid, items);
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->uuid << endl;
+            cout << "Item " << it2->get_uuid() << endl;
             it2->decrypt_overview();
             it2->decrypt_data();
         }
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         items.clear();
         vault.get_items_category(it1->first, items);
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->uuid << endl;
+            cout << "Item " << it2->get_uuid() << endl;
             it2->decrypt_overview();
             it2->decrypt_data();
         }

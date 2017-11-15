@@ -277,6 +277,13 @@ void Vault::get_items(vector<BandEntry> &items) {
     get_items_query(SQL_SELECT_ITEMS, items);
 }
 
+void Vault::set_items(vector<BandEntry> &items) {
+    //for every item
+    //check what's updated
+    //update db
+    //write file
+}
+
 void Vault::get_items_folder(string folder, std::vector<BandEntry> &items) {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_FOLDER, folder.c_str()) + 1;
     char *buf;
