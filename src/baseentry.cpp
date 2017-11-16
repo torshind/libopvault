@@ -91,7 +91,7 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const unsigned
     DBGVAR(plaintext);
 }
 
-bool BaseEntry::verify_opdata(const string &encoded_opdata, const unsigned char key[]) {
+void BaseEntry::verify_opdata(const string &encoded_opdata, const unsigned char key[]) {
 
     string opdata;
     StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));

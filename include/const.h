@@ -114,4 +114,10 @@ const std::unordered_map<std::string, std::string> CATEGORIES = { {"001", "Login
                                                                   {"110", "Server"},
                                                                   {"111", "Email"} };
 
+struct UpdateState {
+    bool update_plain;
+    bool update_o;
+    bool update_d;
+};
+
 #endif

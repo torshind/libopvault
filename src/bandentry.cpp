@@ -73,4 +73,8 @@ void BandEntry::decrypt_overview() {
     decrypt_opdata(o, (unsigned char*) overview_key, decrypted_overview);
 }
 
+void BandEntry::verify() {
+    // TODO: verify item using hmac
+}
+
 }

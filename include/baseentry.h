@@ -43,7 +43,7 @@ protected:
     static unsigned char master_key[KEY_LENGTH];
 
     void decrypt_opdata(const std::string &encoded_opdata, const unsigned char key[], std::string &plaintext);
-    bool verify_opdata(const std::string &encoded_opdata, const unsigned char key[]);
+    void verify_opdata(const std::string &encoded_opdata, const unsigned char key[]);
 };
 
 }

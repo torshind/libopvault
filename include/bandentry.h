@@ -37,8 +37,28 @@ class BandEntry : BaseEntry {
     friend class Band;
 
 public:
-    BandEntry() {}
+    BandEntry() {
+        updateState.update_d = false;
+        updateState.update_o = false;
+        updateState.update_plain = false;
+    }
 
+    std::string get_overview() { return o; }
+    std::string get_uuid() { return uuid; }
+    std::string get_category() { return category; }
+    std::string get_data() { return d; }
+    std::string get_folder() { return folder; }
+
+    void set_overview(std::string _o) { o = _o; updateState.update_o = true; }
+    void set_category(std::string _category) { category = _category; updateState.update_plain = true; }
+    void set_data(std::string _d) { d = _d; updateState.update_d = true; }
+    void set_folder(std::string _folder) { folder = _folder; updateState.update_plain = true; }
+
+    void decrypt_data();
+    void decrypt_overview();
+    void verify();
+
+private:
     BandEntry(int _created,
               std::string _o,
               int _tx,
@@ -59,18 +79,12 @@ public:
         folder(_folder),
         hmac(_hmac),
         k(_k)
-    {}
+    {
+        updateState.update_d = false;
+        updateState.update_o = false;
+        updateState.update_plain = false;
+    }
 
-    std::string get_overview() { return o; }
-    std::string get_uuid() { return uuid; }
-    std::string get_category() { return category; }
-    std::string get_data() { return d; }
-    std::string get_folder() { return folder; }
-
-    void decrypt_data();
-    void decrypt_overview();
-
-private:
     int created;
     std::string o;
     int tx;
@@ -85,7 +99,13 @@ private:
     std::string decrypted_overview;
     std::string decrypted_data;
 
+    UpdateState updateState;
+
     void decrypt_key(std::string &key);
+    void generate_key() {}
+    void generate_hmac() {}
+    void encrypt_data() {}
+    void encrypt_overview() {}
 };
 
 }

@@ -39,8 +39,10 @@ int main(int argc, char *argv[])
     string cloud_data_dir = "./onepassword_data/default";
     string local_data_dir = "./";
 
+    // OPEN VAULT
     Vault vault(cloud_data_dir, local_data_dir, master_password);
 
+    // GET FOLDER CONTENTS
     vector<FolderEntry> folders;
     vault.get_folders(folders);
     for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
@@ -48,12 +50,8 @@ int main(int argc, char *argv[])
     }
 
     vector<BandEntry> items;
-    vault.get_items(items);
-    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
-        it->decrypt_overview();
-        it->decrypt_data();
-    }
 
+    // GET ITEMS BY FOLDER
     for(vector<FolderEntry>::iterator it1=folders.begin(); it1!=folders.end(); ++it1) {
         cout << "Folder " << it1->get_uuid() << endl;
         items.clear();
@@ -65,6 +63,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    // GET ITEMS BY CATEGORY
     for(unordered_map<string,string>::const_iterator it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
         cout << "Category " << it1->second << endl;
         items.clear();
@@ -75,6 +74,23 @@ int main(int argc, char *argv[])
             it2->decrypt_data();
         }
     }
+
+    // GET ALL ITEMS
+    items.clear();
+    vault.get_items(items);
+    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+        it->decrypt_overview();
+        it->decrypt_data();
+    }
+
+    // INSERT NEW ITEM
+    BandEntry item;
+    item.set_category(CATEGORIES.find("001")->first);
+    item.set_data("{\"sections\":[{\"name\":\"\",\"title\":\"\",\"fields\":[{\"k\":\"string\",\"n\":\"org_name\",\"t\":\"group\"},{\"k\":\"URL\",\"n\":\"website\",\"v\":\"http://www.urbana.edu/resources/community/johnny-appleseed/appleseed-society.html\",\"t\":\"website\"},{\"k\":\"phone\",\"n\":\"phone\",\"t\":\"telephone\"},{\"k\":\"string\",\"n\":\"member_name\",\"v\":\"Wendy Appleseed\",\"t\":\"member name\"},{\"k\":\"monthYear\",\"n\":\"member_since\",\"t\":\"member since\"},{\"k\":\"monthYear\",\"n\":\"expiry_date\",\"v\":2625,\"t\":\"expiry date\"},{\"k\":\"string\",\"n\":\"membership_no\",\"v\":\"123456789\",\"t\":\"member ID\"},{\"k\":\"concealed\",\"n\":\"pin\",\"v\":\"B8HqCdCMAY8KxJqgWASD\",\"t\":\"password\"}]}]}");
+    item.set_folder("379A3A7E5D5A47A6AA3A69C4D1E57D1B");
+    item.set_overview("{\"title\":\"Tumblr\",\"URLs\":[{\"u\":\"http://www.tumblr.com/login\"}],\"ainfo\":\"wendy@appleseed.com\",\"url\":\"http://www.tumblr.com/login\",\"tags\":[\"Sample\"],\"ps\":48}]");
+    items.push_back(item);
+    vault.set_items(items);
 
     return 0;
 }

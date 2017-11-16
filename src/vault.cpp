@@ -278,9 +278,9 @@ void Vault::get_items(vector<BandEntry> &items) {
 }
 
 void Vault::set_items(vector<BandEntry> &items) {
-    //for every item
-    //check what's updated
     //update db
+    Band band;
+    band.insert_all_entries(items);
     //write file
 }
 

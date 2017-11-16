@@ -77,7 +77,7 @@ void Band::create_table() {
 }
 
 void Band::insert_entry(BandEntry &item) {
-    int sz = snprintf(nullptr, 0, SQL_INSERT_ITEMS_ENTRY,
+    int sz = snprintf(nullptr, 0, SQL_REPLACE_ITEMS_ENTRY,
                       item.created,
                       item.o.c_str(),
                       item.tx,
@@ -90,7 +90,7 @@ void Band::insert_entry(BandEntry &item) {
                       item.k.c_str()) + 1;
     char *buf;
     buf = (char*) malloc(sz);
-    snprintf(buf, sz, SQL_INSERT_ITEMS_ENTRY,
+    snprintf(buf, sz, SQL_REPLACE_ITEMS_ENTRY,
              item.created,
              item.o.c_str(),
              item.tx,
@@ -111,6 +111,26 @@ void Band::insert_entry(BandEntry &item) {
 void Band::insert_all_entries() {
     for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
         insert_entry(*it);
+    }
+}
+
+void Band::insert_all_entries(std::vector<BandEntry> items) {
+    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+        if (it->k.empty()) {
+            it->generate_key();
+            it->updateState.update_d = true;
+            it->updateState.update_o = true;
+        }
+        if (it->updateState.update_d) {
+            it->encrypt_data();
+        }
+        if (it->updateState.update_o) {
+            it->encrypt_overview();
+        }
+        if (it->updateState.update_d || it->updateState.update_o || it->updateState.update_plain) {
+            it->generate_hmac();
+            insert_entry(*it);
+        }
     }
 }
 
