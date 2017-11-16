@@ -27,6 +27,9 @@ SOFTWARE.
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 
+#include <uuid/uuid.h>
+
+#include "dbg.h"
 #include "const.h"
 #include "vault.h"
 
@@ -75,6 +78,17 @@ void BandEntry::decrypt_overview() {
 
 void BandEntry::verify() {
     // TODO: verify item using hmac
+}
+
+void BandEntry::generate_key() {
+    // Generate UUID
+    uuid_t uuid_bin;
+    char uuid_str[37];
+
+    uuid_generate(uuid_bin);
+    uuid_unparse_upper(uuid_bin, uuid_str);
+    uuid = string(uuid_str);
+    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
 }
 
 }

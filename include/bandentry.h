@@ -102,7 +102,7 @@ private:
     UpdateState updateState;
 
     void decrypt_key(std::string &key);
-    void generate_key() {}
+    void generate_key();
     void generate_hmac() {}
     void encrypt_data() {}
     void encrypt_overview() {}
