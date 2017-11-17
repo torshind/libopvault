@@ -26,6 +26,9 @@ SOFTWARE.
 #include <cryptopp/base64.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/hmac.h>
+#include <cryptopp/sha.h>
 
 #include <uuid/uuid.h>
 
@@ -40,6 +43,10 @@ using namespace CryptoPP;
 
 namespace OPVault {
 
+void BandEntry::verify_key() {
+    // TODO: verify key using master mac key
+}
+
 void BandEntry::decrypt_key(std::string &key) {
     string encrypted_key;
     StringSource(k, true, new Base64Decoder(new StringSink(encrypted_key)));
@@ -52,9 +59,6 @@ void BandEntry::decrypt_key(std::string &key) {
     byte *ciphertext = NULL;
     ciphertext = (byte*) calloc(ITEM_KEY_LENGTH, sizeof(byte));
     memcpy(ciphertext, key_byte+IV_LENGTH, ITEM_KEY_LENGTH*sizeof(byte));
-
-    byte hmac[HMAC_LENGTH] = "";
-    memcpy(hmac, key_byte+ITEM_START_HMAC, HMAC_LENGTH*sizeof(byte));
 
     AES::Decryption aes_decryption(master_key, ENC_KEY_LENGTH);
     CBC_Mode_ExternalCipher::Decryption cbc_decryption(aes_decryption, iv);
@@ -77,10 +81,10 @@ void BandEntry::decrypt_overview() {
 }
 
 void BandEntry::verify() {
-    // TODO: verify item using hmac
+    // TODO: verify item using hmac and overview mac key
 }
 
-void BandEntry::generate_key() {
+void BandEntry::init() {
     // Generate UUID
     uuid_t uuid_bin;
     char uuid_str[37];
@@ -89,6 +93,32 @@ void BandEntry::generate_key() {
     uuid_unparse_upper(uuid_bin, uuid_str);
     uuid = string(uuid_str);
     uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
+
+    // Generate key
+    AutoSeededRandomPool prng;
+    string encrypted_key;
+
+    SecByteBlock plain_key(ITEM_KEY_LENGTH);
+    prng.GenerateBlock(plain_key, plain_key.size());
+
+    SecByteBlock iv(IV_LENGTH);
+    prng.GenerateBlock(iv, iv.size());
+
+    AES::Encryption aes_encryption(master_key, ENC_KEY_LENGTH);
+    CBC_Mode_ExternalCipher::Encryption cbc_encryption(aes_encryption, iv);
+
+    StreamTransformationFilter stf_encryptor(cbc_encryption, new StringSink(encrypted_key), StreamTransformationFilter::NO_PADDING);
+    stf_encryptor.Put(plain_key, ITEM_KEY_LENGTH);
+    stf_encryptor.MessageEnd();
+
+    // HMAC
+    string mac;
+
+    HMAC<SHA256> hmac(plain_key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+
+    StringSource(string((const char *) iv.BytePtr(), IV_LENGTH) + encrypted_key, true, new HashFilter(hmac, new StringSink(mac)));
+
+    StringSource(string((const char *) iv.BytePtr(), IV_LENGTH) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
 }
 
 }

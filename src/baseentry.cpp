@@ -92,11 +92,10 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const unsigned
 }
 
 void BaseEntry::verify_opdata(const string &encoded_opdata, const unsigned char key[]) {
-
     string opdata;
     StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));
 
-    HMAC<SHA256> hmac(key+ENC_KEY_LENGTH, ENC_KEY_LENGTH);
+    HMAC<SHA256> hmac(key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
     const int flags = HashVerificationFilter::THROW_EXCEPTION | HashVerificationFilter::HASH_AT_END;
 
     StringSource(opdata, true, new HashVerificationFilter(hmac, NULL, flags));

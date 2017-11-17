@@ -34,16 +34,16 @@ const int LENGTH_LENGTH = 8;
 const int START_IV = 16;
 const int IV_LENGTH = 16;
 const int START_CIPHER = 32;
-const int HMAC_LENGTH = 32;
 const int NON_CIPHER_LENGTH = 64;
 const int KEY_LENGTH = 64;
 const int ENC_KEY_LENGTH = 32;
+const int MAC_KEY_LENGTH = 32;
 
 const int BAND_NUM = 16;
 const char BAND_INDEXES[BAND_NUM] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
 
 const int ITEM_KEY_LENGTH = 64;
-const int ITEM_START_HMAC = 80;
+const int ITEM_K_LENGTH = 112;
 
 const char DBFILE[] = "opvault.db";
 const char SQL_CREATE_PROFILE[] = "CREATE TABLE Profile (" \

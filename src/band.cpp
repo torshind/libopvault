@@ -117,7 +117,7 @@ void Band::insert_all_entries() {
 void Band::insert_all_entries(std::vector<BandEntry> items) {
     for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
         if (it->k.empty()) {
-            it->generate_key();
+            it->init();
             it->updateState.update_d = true;
             it->updateState.update_o = true;
         }

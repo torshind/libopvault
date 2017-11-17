@@ -101,8 +101,9 @@ private:
 
     UpdateState updateState;
 
+    void verify_key();
     void decrypt_key(std::string &key);
-    void generate_key();
+    void init();
     void generate_hmac() {}
     void encrypt_data() {}
     void encrypt_overview() {}
