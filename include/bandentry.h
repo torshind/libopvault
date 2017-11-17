@@ -46,7 +46,6 @@ public:
     std::string get_overview() { return o; }
     std::string get_uuid() { return uuid; }
     std::string get_category() { return category; }
-    std::string get_data() { return d; }
     std::string get_folder() { return folder; }
 
     void set_overview(std::string _o) { o = _o; updateState.update_o = true; }
@@ -54,8 +53,8 @@ public:
     void set_data(std::string _d) { d = _d; updateState.update_d = true; }
     void set_folder(std::string _folder) { folder = _folder; updateState.update_plain = true; }
 
-    void decrypt_data();
-    void decrypt_overview();
+    void decrypt_data(std::string& data);
+    void decrypt_overview(std::string& overview);
     void verify();
 
 private:
@@ -95,9 +94,6 @@ private:
     std::string folder;
     std::string hmac;
     std::string k;
-
-    std::string decrypted_overview;
-    std::string decrypted_data;
 
     UpdateState updateState;
 

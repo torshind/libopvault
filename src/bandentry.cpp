@@ -69,15 +69,19 @@ void BandEntry::decrypt_key(std::string &key) {
     stf_decryptor.MessageEnd();
 }
 
-void BandEntry::decrypt_data() {
+void BandEntry::decrypt_data(std::string& data) {
+    string decrypted_data;
     string item_key;
+
     decrypt_key(item_key);
 
-    decrypt_opdata(d, (unsigned char*) item_key.data(), decrypted_data);
+    decrypt_opdata(d, (unsigned char*) item_key.data(), data);
 }
 
-void BandEntry::decrypt_overview() {
-    decrypt_opdata(o, (unsigned char*) overview_key, decrypted_overview);
+void BandEntry::decrypt_overview(std::string& overview) {
+    string decrypted_overview;
+
+    decrypt_opdata(o, (unsigned char*) overview_key, overview);
 }
 
 void BandEntry::verify() {
@@ -118,6 +122,7 @@ void BandEntry::init() {
 
     StringSource(string((const char *) iv.BytePtr(), IV_LENGTH) + encrypted_key, true, new HashFilter(hmac, new StringSink(mac)));
 
+    // Base64 encoding
     StringSource(string((const char *) iv.BytePtr(), IV_LENGTH) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
 }
 

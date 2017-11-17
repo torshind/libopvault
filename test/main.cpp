@@ -58,8 +58,11 @@ int main(int argc, char *argv[])
         vault.get_items_folder(it1->get_uuid(), items);
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
             cout << "Item " << it2->get_uuid() << endl;
-            it2->decrypt_overview();
-            it2->decrypt_data();
+            string str;
+            it2->decrypt_overview(str);
+            cout << "Overview: " << str << endl;
+            it2->decrypt_data(str);
+            cout << "Data: " << str << endl;
         }
     }
 
@@ -70,8 +73,11 @@ int main(int argc, char *argv[])
         vault.get_items_category(it1->first, items);
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
             cout << "Item " << it2->get_uuid() << endl;
-            it2->decrypt_overview();
-            it2->decrypt_data();
+            string str;
+            it2->decrypt_overview(str);
+            cout << "Overview: " << str << endl;
+            it2->decrypt_data(str);
+            cout << "Data: " << str << endl;
         }
     }
 
@@ -79,8 +85,11 @@ int main(int argc, char *argv[])
     items.clear();
     vault.get_items(items);
     for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
-        it->decrypt_overview();
-        it->decrypt_data();
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
+        it->decrypt_data(str);
+        cout << "Data: " << str << endl;
     }
 
     // INSERT NEW ITEM
