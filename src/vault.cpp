@@ -63,7 +63,7 @@ Vault::Vault(const string &cloud_data_dir, const string &local_data_dir, const s
 
 void Vault::sql_exec(const char sql[]) {
     sqlite3 *db;
-    char *zErrMsg = 0;
+    char *zErrMsg = nullptr;
     int rc;
 
     rc = sqlite3_open(DBFILE, &db);
@@ -71,20 +71,18 @@ void Vault::sql_exec(const char sql[]) {
     if(rc){
         ostringstream os;
         os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
-        throw std::runtime_error(os.str());
         sqlite3_close(db);
-        return;
+        throw std::runtime_error(os.str());
     }
 
-    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
+    rc = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
 
     if(rc != SQLITE_OK){
         ostringstream os;
         os << "libopvault: SQL error: " << zErrMsg << " - error code: " << rc;
-        throw std::runtime_error(os.str());
         sqlite3_free(zErrMsg);
         sqlite3_close(db);
-        return;
+        throw std::runtime_error(os.str());
     }
 
     sqlite3_free(zErrMsg);
@@ -100,28 +98,25 @@ void Vault::get_profile() {
     if(rc){
         ostringstream os;
         os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
-        throw std::runtime_error(os.str());
         sqlite3_close(db);
-        return;
+        throw std::runtime_error(os.str());
     }
 
     sqlite3_stmt *stmt;
     if (rc = sqlite3_prepare_v2(db, SQL_SELECT_PROFILE, -1, &stmt, NULL) != SQLITE_OK) {
         ostringstream os;
         os << "libopvault: SQL prepare error - error code: " << rc;
-        throw std::runtime_error(os.str());
         sqlite3_close(db);
-        return;
+        throw std::runtime_error(os.str());
     }
 
 
     else {
-        if (rc = sqlite3_step(stmt) != SQLITE_ROW) {
+        if ((rc = sqlite3_step(stmt)) != SQLITE_ROW) {
             ostringstream os;
             os << "libopvault: profile table not present in DB - error code: " << rc;
-            throw std::runtime_error(os.str());
             sqlite3_close(db);
-            return;
+            throw std::runtime_error(os.str());
         }
         profile.lastUpdatedBy = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         profile.updatedAt = sqlite3_column_int(stmt, 1);
@@ -149,18 +144,16 @@ void Vault::get_folders(vector<FolderEntry> &folders) {
     if(rc){
         ostringstream os;
         os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
-        throw std::runtime_error(os.str());
         sqlite3_close(db);
-        return;
+        throw std::runtime_error(os.str());
     }
 
     sqlite3_stmt *stmt;
-    if (rc = sqlite3_prepare_v2(db, SQL_SELECT_FOLDERS, -1, &stmt, NULL) != SQLITE_OK) {
+    if ((rc = sqlite3_prepare_v2(db, SQL_SELECT_FOLDERS, -1, &stmt, nullptr) != SQLITE_OK)) {
         ostringstream os;
         os << "libopvault: SQL prepare error - error code: " << rc;
-        throw std::runtime_error(os.str());
         sqlite3_close(db);
-        return;
+        throw std::runtime_error(os.str());
     }
     else {
         for (;;) {
@@ -170,9 +163,8 @@ void Vault::get_folders(vector<FolderEntry> &folders) {
             if (rc != SQLITE_ROW) {
                 ostringstream os;
                 os << "libopvault: folders table not present in DB - error code: " << rc;
-                throw std::runtime_error(os.str());
                 sqlite3_close(db);
-                return;
+                throw std::runtime_error(os.str());
             }
             FolderEntry folder;
             folder.created = sqlite3_column_int(stmt, 0);
@@ -197,9 +189,8 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) {
     if(rc){
         ostringstream os;
         os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
-        throw std::runtime_error(os.str());
         sqlite3_close(db);
-        return;
+        throw std::runtime_error(os.str());
     }
 
     sqlite3_stmt *stmt;
@@ -213,9 +204,8 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) {
             if (rc != SQLITE_ROW) {
                 ostringstream os;
                 os << "libopvault: items table not present in DB - error code: " << rc;
-                throw std::runtime_error(os.str());
                 sqlite3_close(db);
-                return;
+                throw std::runtime_error(os.str());
             }
             BandEntry item;
             item.created = sqlite3_column_int(stmt, 0);
@@ -244,7 +234,6 @@ void Vault::create_db(const string &cloud_data_dir) {
     }
     catch (...) {
         throw;
-        return;
     }
     pro.create_table();
     pro.insert_entry();
@@ -256,7 +245,6 @@ void Vault::create_db(const string &cloud_data_dir) {
     }
     catch (...) {
         throw;
-        return;
     }
     folders.create_table();
     folders.insert_all_entries();
@@ -267,7 +255,6 @@ void Vault::create_db(const string &cloud_data_dir) {
     }
     catch (...) {
         throw;
-        return;
     }
     band.create_table();
     band.insert_all_entries();
