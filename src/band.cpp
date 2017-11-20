@@ -37,7 +37,7 @@ namespace OPVault {
 
 void Band::read() {
     int exept_count = 0;
-    for (char index=0; index<BAND_NUM; ++index) {
+    for (int index=0; index<BAND_NUM; ++index) {
         try {
             File::read(string("band_") + BAND_INDEXES[index] + string(".js"));
         }
@@ -46,7 +46,6 @@ void Band::read() {
             if (exept_count == BAND_NUM)
             {
                 throw;
-                return;
             }
             continue;
         }
