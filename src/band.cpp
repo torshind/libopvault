@@ -116,18 +116,7 @@ void Band::insert_all_entries() {
 
 void Band::insert_all_entries(std::vector<BandEntry> items) {
     for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
-        if (it->k.empty()) {
-            it->init();
-            it->updateState.update_d = true;
-            it->updateState.update_o = true;
-        }
-        if (it->updateState.update_d) {
-            it->encrypt_data();
-        }
-        if (it->updateState.update_o) {
-            it->encrypt_overview();
-        }
-        if (it->updateState.update_d || it->updateState.update_o || it->updateState.update_plain) {
+        if (it->updateState) {
             it->generate_hmac();
             insert_entry(*it);
         }

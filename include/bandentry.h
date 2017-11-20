@@ -38,9 +38,7 @@ class BandEntry : BaseEntry {
 
 public:
     BandEntry() {
-        updateState.update_d = false;
-        updateState.update_o = false;
-        updateState.update_plain = false;
+        updateState = false;
     }
 
     std::string get_overview() { return o; }
@@ -48,10 +46,10 @@ public:
     std::string get_category() { return category; }
     std::string get_folder() { return folder; }
 
-    void set_overview(std::string _o) { o = _o; updateState.update_o = true; }
-    void set_category(std::string _category) { category = _category; updateState.update_plain = true; }
-    void set_data(std::string _d) { d = _d; updateState.update_d = true; }
-    void set_folder(std::string _folder) { folder = _folder; updateState.update_plain = true; }
+    void set_overview(std::string _o) {}
+    void set_category(std::string _category) {}
+    void set_data(std::string _d);
+    void set_folder(std::string _folder) {}
 
     void decrypt_data(std::string& data);
     void decrypt_overview(std::string& overview);
@@ -79,9 +77,7 @@ private:
         hmac(_hmac),
         k(_k)
     {
-        updateState.update_d = false;
-        updateState.update_o = false;
-        updateState.update_plain = false;
+        updateState = false;
     }
 
     int created;
@@ -95,13 +91,12 @@ private:
     std::string hmac;
     std::string k;
 
-    UpdateState updateState;
+    bool updateState;
 
     void verify_key();
     void decrypt_key(std::string &key);
     void init();
     void generate_hmac() {}
-    void encrypt_data() {}
     void encrypt_overview() {}
 };
 

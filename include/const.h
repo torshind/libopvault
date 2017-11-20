@@ -28,6 +28,13 @@ SOFTWARE.
 
 #include <unordered_map>
 
+#include <cryptopp/config.h>
+#if (CRYPTOPP_VERSION >= 600) && (__cplusplus >= 201103L)
+    using byte = CryptoPP::byte;
+#else
+    typedef unsigned char byte;
+#endif
+
 //constants declarations
 const int HEADER_LENGTH = 8;
 const int LENGTH_LENGTH = 8;
@@ -39,11 +46,13 @@ const int KEY_LENGTH = 64;
 const int ENC_KEY_LENGTH = 32;
 const int MAC_KEY_LENGTH = 32;
 
-const int BAND_NUM = 16;
-const char BAND_INDEXES[BAND_NUM] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
-
 const int ITEM_KEY_LENGTH = 64;
 const int ITEM_K_LENGTH = 112;
+
+const int BLOCK_LENGTH = 16;
+
+const int BAND_NUM = 16;
+const char BAND_INDEXES[BAND_NUM] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
 
 const char DBFILE[] = "opvault.db";
 const char SQL_CREATE_PROFILE[] = "CREATE TABLE Profile (" \
@@ -113,11 +122,5 @@ const std::unordered_map<std::string, std::string> CATEGORIES = { {"001", "Login
                                                                   {"109", "Router"},
                                                                   {"110", "Server"},
                                                                   {"111", "Email"} };
-
-struct UpdateState {
-    bool update_plain;
-    bool update_o;
-    bool update_d;
-};
 
 #endif

@@ -75,13 +75,13 @@ void BandEntry::decrypt_data(std::string& data) {
 
     decrypt_key(item_key);
 
-    decrypt_opdata(d, (unsigned char*) item_key.data(), data);
+    decrypt_opdata(d, reinterpret_cast<const unsigned char *> (item_key.data()), data);
 }
 
 void BandEntry::decrypt_overview(std::string& overview) {
     string decrypted_overview;
 
-    decrypt_opdata(o, (unsigned char*) overview_key, overview);
+    decrypt_opdata(o, overview_key, overview);
 }
 
 void BandEntry::verify() {
@@ -108,6 +108,7 @@ void BandEntry::init() {
     SecByteBlock iv(IV_LENGTH);
     prng.GenerateBlock(iv, iv.size());
 
+    // Encryption
     AES::Encryption aes_encryption(master_key, ENC_KEY_LENGTH);
     CBC_Mode_ExternalCipher::Encryption cbc_encryption(aes_encryption, iv);
 
@@ -120,10 +121,34 @@ void BandEntry::init() {
 
     HMAC<SHA256> hmac(plain_key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 
-    StringSource(string((const char *) iv.BytePtr(), IV_LENGTH) + encrypted_key, true, new HashFilter(hmac, new StringSink(mac)));
+    StringSource(string(reinterpret_cast<const char *> (iv.data()), IV_LENGTH) + encrypted_key, true, new HashFilter(hmac, new StringSink(mac)));
 
     // Base64 encoding
-    StringSource(string((const char *) iv.BytePtr(), IV_LENGTH) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
+    StringSource(string(reinterpret_cast<const char *> (iv.data()), IV_LENGTH) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
+
+    // TODO: timestamps
+}
+
+void BandEntry::set_data(string _d) {
+    updateState = true;
+    if (k.empty()) {
+        init();
+    }
+
+    string item_key;
+    unsigned char iv[IV_LENGTH];
+
+    decrypt_key(item_key);
+
+    if (d.empty()) {
+        // Generate iv
+        AutoSeededRandomPool prng;
+        prng.GenerateBlock(iv, IV_LENGTH);
+    } else {
+        get_iv(d, iv);
+    }
+
+    encrypt_opdata(_d, iv, reinterpret_cast<const unsigned char *> (item_key.data()), d);
 }
 
 }

@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
             cout << "Item " << it2->get_uuid() << endl;
             string str;
-            it2->decrypt_overview(str);
+            //it2->decrypt_overview(str);
             cout << "Overview: " << str << endl;
             it2->decrypt_data(str);
             cout << "Data: " << str << endl;
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
             cout << "Item " << it2->get_uuid() << endl;
             string str;
-            it2->decrypt_overview(str);
+            //it2->decrypt_overview(str);
             cout << "Overview: " << str << endl;
             it2->decrypt_data(str);
             cout << "Data: " << str << endl;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     vault.get_items(items);
     for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
         string str;
-        it->decrypt_overview(str);
+        //it->decrypt_overview(str);
         cout << "Overview: " << str << endl;
         it->decrypt_data(str);
         cout << "Data: " << str << endl;

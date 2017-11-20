@@ -26,6 +26,7 @@ SOFTWARE.
 #include <cryptopp/base64.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
+#include <cryptopp/osrng.h>
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
@@ -41,6 +42,16 @@ namespace OPVault {
 unsigned char BaseEntry::derived_key[KEY_LENGTH];
 unsigned char BaseEntry::master_key[KEY_LENGTH];
 unsigned char BaseEntry::overview_key[KEY_LENGTH];
+
+void BaseEntry::verify_opdata(const string &encoded_opdata, const unsigned char key[]) {
+    string opdata;
+    StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));
+
+    HMAC<SHA256> hmac(key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+    const int flags = HashVerificationFilter::THROW_EXCEPTION | HashVerificationFilter::HASH_AT_END;
+
+    StringSource(opdata, true, new HashVerificationFilter(hmac, NULL, flags));
+}
 
 void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const unsigned char key[], std::string &plaintext) {
     try {
@@ -91,14 +102,51 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const unsigned
     DBGVAR(plaintext);
 }
 
-void BaseEntry::verify_opdata(const string &encoded_opdata, const unsigned char key[]) {
+void BaseEntry::get_iv(const std::string &encoded_opdata, unsigned char iv[IV_LENGTH]) {
     string opdata;
     StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));
 
-    HMAC<SHA256> hmac(key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
-    const int flags = HashVerificationFilter::THROW_EXCEPTION | HashVerificationFilter::HASH_AT_END;
+    memcpy(iv, opdata.data()+START_IV, IV_LENGTH);
+}
 
-    StringSource(opdata, true, new HashVerificationFilter(hmac, NULL, flags));
+void BaseEntry::encrypt_opdata(const std::string &plaintext, const unsigned char iv[], const unsigned char key[], std::string &encoded_opdata) {
+    string ciphertext;
+
+    // Padding
+    unsigned int padding_length = (BLOCK_LENGTH - plaintext.size() % BLOCK_LENGTH);
+    AutoSeededRandomPool prng;
+
+    byte* padding = new byte[padding_length];
+    prng.GenerateBlock(padding, padding_length);
+
+    // Encryption
+    AES::Encryption aes_encryption(key, ENC_KEY_LENGTH);
+    CBC_Mode_ExternalCipher::Encryption cbc_encryption(aes_encryption, iv);
+
+    StreamTransformationFilter stf_encryptor(cbc_encryption, new StringSink(ciphertext), StreamTransformationFilter::NO_PADDING);
+
+    string paddedtext = string(reinterpret_cast<const char *> (padding), padding_length) + plaintext;
+    stf_encryptor.Put(reinterpret_cast<const byte *> (paddedtext.data()), paddedtext.size());
+    stf_encryptor.MessageEnd();
+
+    // opdata
+    byte plaintext_length_byte[LENGTH_LENGTH];
+    int64_t plaintext_length = static_cast<int64_t> (plaintext.size());
+    memcpy(plaintext_length_byte, &plaintext_length, LENGTH_LENGTH);
+
+    string opdata = string("opdata01") + string(reinterpret_cast<const char *> (plaintext_length_byte), LENGTH_LENGTH) + string(reinterpret_cast<const char *> (iv), IV_LENGTH) + ciphertext;
+
+    // HMAC
+    string mac;
+
+    HMAC<SHA256> hmac(key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+
+    StringSource(opdata, true, new HashFilter(hmac, new StringSink(mac)));
+
+    // Base64 encoding
+    StringSource(opdata + mac, true, new Base64Encoder(new StringSink(encoded_opdata)));
+
+    delete padding;
 }
 
 }

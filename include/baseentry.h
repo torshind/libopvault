@@ -42,8 +42,10 @@ protected:
     static unsigned char overview_key[KEY_LENGTH];
     static unsigned char master_key[KEY_LENGTH];
 
-    void decrypt_opdata(const std::string &encoded_opdata, const unsigned char key[], std::string &plaintext);
     void verify_opdata(const std::string &encoded_opdata, const unsigned char key[]);
+    void decrypt_opdata(const std::string &encoded_opdata, const unsigned char key[], std::string &plaintext);
+    void get_iv(const std::string &encoded_opdata, unsigned char iv[IV_LENGTH]);
+    void encrypt_opdata(const std::string &plaintext, const unsigned char iv[], const unsigned char key[], std::string &encoded_opdata);
 };
 
 }
