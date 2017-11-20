@@ -46,7 +46,7 @@ public:
     std::string get_category() { return category; }
     std::string get_folder() { return folder; }
 
-    void set_overview(std::string _o) {}
+    void set_overview(std::string _o);
     void set_category(std::string _category) {}
     void set_data(std::string _d);
     void set_folder(std::string _folder) {}

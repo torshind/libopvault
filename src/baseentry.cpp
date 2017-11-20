@@ -86,6 +86,9 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const SecByteB
 
     CBC_Mode<AES>::Decryption decryption(key, ENC_KEY_LENGTH, iv);
 
+    if (!plaintext.empty()) {
+        plaintext.clear();
+    }
     StringSource(ciphertext, true, new StreamTransformationFilter(decryption, new StringSink(plaintext), StreamTransformationFilter::NO_PADDING));
 
     plaintext.erase(0, ciphertext_length-plaintext_length);

@@ -141,4 +141,20 @@ void BandEntry::set_data(string _d) {
     encrypt_opdata(_d, iv, item_key, d);
 }
 
+void BandEntry::set_overview(std::string _o) {
+    updateState = true;
+
+    SecByteBlock iv;
+
+    if (o.empty()) {
+        // Generate iv
+        AutoSeededRandomPool prng;
+        iv = SecByteBlock(AES::BLOCKSIZE);
+        prng.GenerateBlock(iv, AES::BLOCKSIZE);
+    } else {
+        get_iv(o, iv);
+    }
+    encrypt_opdata(_o, iv, overview_key, o);
+}
+
 }
