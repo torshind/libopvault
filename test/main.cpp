@@ -29,6 +29,7 @@ SOFTWARE.
 #include "profile.h"
 #include "folder.h"
 #include "band.h"
+#include "baseentry.h"
 
 using namespace std;
 using namespace OPVault;
@@ -46,7 +47,10 @@ int main(int argc, char *argv[])
     vector<FolderEntry> folders;
     vault.get_folders(folders);
     for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
-        it->decrypt_overview();
+        cout << "Folder " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
     }
 
     vector<BandEntry> items;

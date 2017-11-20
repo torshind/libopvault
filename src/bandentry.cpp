@@ -70,12 +70,6 @@ void BandEntry::decrypt_data(std::string& data) {
     decrypt_opdata(d, item_key, data);
 }
 
-void BandEntry::decrypt_overview(std::string& overview) {
-    string decrypted_overview;
-
-    decrypt_opdata(o, overview_key, overview);
-}
-
 void BandEntry::verify() {
     // TODO: verify item using hmac and overview mac key
 }
@@ -139,22 +133,6 @@ void BandEntry::set_data(string _d) {
     }
 
     encrypt_opdata(_d, iv, item_key, d);
-}
-
-void BandEntry::set_overview(std::string _o) {
-    updateState = true;
-
-    SecByteBlock iv;
-
-    if (o.empty()) {
-        // Generate iv
-        AutoSeededRandomPool prng;
-        iv = SecByteBlock(AES::BLOCKSIZE);
-        prng.GenerateBlock(iv, AES::BLOCKSIZE);
-    } else {
-        get_iv(o, iv);
-    }
-    encrypt_opdata(_o, iv, overview_key, o);
 }
 
 }

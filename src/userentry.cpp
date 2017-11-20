@@ -23,29 +23,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef BASEENTRY_H
-#define BASEENTRY_H
+#include <cryptopp/osrng.h>
 
-#include <string>
-#include <cryptopp/secblock.h>
+#include "userentry.h"
+
+using namespace std;
+using namespace CryptoPP;
 
 namespace OPVault {
 
-class BaseEntry
-{
-protected:
-    BaseEntry() {}
+void UserEntry::decrypt_overview(std::string& overview) {
+    string decrypted_overview;
 
-    static CryptoPP::SecByteBlock derived_key;
-    static CryptoPP::SecByteBlock overview_key;
-    static CryptoPP::SecByteBlock master_key;
-
-    void verify_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key);
-    void decrypt_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key, std::string &plaintext);
-    void get_iv(const std::string &encoded_opdata, CryptoPP::SecByteBlock &iv);
-    void encrypt_opdata(const std::string &plaintext, const CryptoPP::SecByteBlock &iv, const CryptoPP::SecByteBlock &key, std::string &encoded_opdata);
-};
-
+    decrypt_opdata(o, overview_key, overview);
 }
 
-#endif // BASEENTRY_H
+void UserEntry::set_overview(std::string _o) {
+    updateState = true;
+
+    SecByteBlock iv;
+
+    if (o.empty()) {
+        // Generate iv
+        AutoSeededRandomPool prng;
+        iv = SecByteBlock(AES::BLOCKSIZE);
+        prng.GenerateBlock(iv, AES::BLOCKSIZE);
+    } else {
+        get_iv(o, iv);
+    }
+    encrypt_opdata(_o, iv, overview_key, o);
+}
+
+}

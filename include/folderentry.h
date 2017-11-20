@@ -26,11 +26,11 @@ SOFTWARE.
 #ifndef FOLDERENTRY_H
 #define FOLDERENTRY_H
 
-#include "baseentry.h"
+#include "userentry.h"
 
 namespace OPVault {
 
-class FolderEntry : BaseEntry {
+class FolderEntry : public UserEntry {
     friend class Vault;
     friend class Folder;
 public:
@@ -41,26 +41,12 @@ public:
                 int _tx,
                 int _updated,
                 std::string _uuid) :
-        created(_created),
-        o(_o),
-        tx(_tx),
-        updated(_updated),
-        uuid(_uuid)
+        UserEntry(_created,
+                  _o,
+                  _tx,
+                  _updated,
+                  _uuid)
     {}
-
-    std::string get_overview() { return o; }
-    std::string get_uuid() { return uuid; }
-
-    void decrypt_overview();
-
-private:
-    int created;
-    std::string o;
-    int tx;
-    int updated;
-    std::string uuid;
-
-    std::string decrypted_overview;
 };
 
 }

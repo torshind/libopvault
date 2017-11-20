@@ -28,11 +28,11 @@ SOFTWARE.
 
 #include <vector>
 
-#include "baseentry.h"
+#include "userentry.h"
 
 namespace OPVault {
 
-class BandEntry : BaseEntry {
+class BandEntry : public UserEntry {
     friend class Vault;
     friend class Band;
 
@@ -41,18 +41,14 @@ public:
         updateState = false;
     }
 
-    std::string get_overview() { return o; }
-    std::string get_uuid() { return uuid; }
     std::string get_category() { return category; }
     std::string get_folder() { return folder; }
 
-    void set_overview(std::string _o);
     void set_category(std::string _category) {}
     void set_data(std::string _d);
     void set_folder(std::string _folder) {}
 
     void decrypt_data(std::string& data);
-    void decrypt_overview(std::string& overview);
     void verify();
 
 private:
@@ -66,11 +62,11 @@ private:
               std::string _folder,
               std::string _hmac,
               std::string _k) :
-        created(_created),
-        o(_o),
-        tx(_tx),
-        updated(_updated),
-        uuid(_uuid),
+        UserEntry(_created,
+                  _o,
+                  _tx,
+                  _updated,
+                  _uuid),
         category(_category),
         d(_d),
         folder(_folder),
@@ -80,24 +76,16 @@ private:
         updateState = false;
     }
 
-    int created;
-    std::string o;
-    int tx;
-    int updated;
-    std::string uuid;
     std::string category;
     std::string d;
     std::string folder;
     std::string hmac;
     std::string k;
 
-    bool updateState;
-
     void verify_key();
     void decrypt_key(CryptoPP::SecByteBlock &key);
     void init();
     void generate_hmac() {}
-    void encrypt_overview() {}
 };
 
 }
