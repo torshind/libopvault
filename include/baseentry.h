@@ -27,8 +27,7 @@ SOFTWARE.
 #define BASEENTRY_H
 
 #include <string>
-
-#include "const.h"
+#include <cryptopp/secblock.h>
 
 namespace OPVault {
 
@@ -38,14 +37,14 @@ public:
     BaseEntry() {}
 
 protected:
-    static unsigned char derived_key[KEY_LENGTH];
-    static unsigned char overview_key[KEY_LENGTH];
-    static unsigned char master_key[KEY_LENGTH];
+    static CryptoPP::SecByteBlock derived_key;
+    static CryptoPP::SecByteBlock overview_key;
+    static CryptoPP::SecByteBlock master_key;
 
-    void verify_opdata(const std::string &encoded_opdata, const unsigned char key[]);
-    void decrypt_opdata(const std::string &encoded_opdata, const unsigned char key[], std::string &plaintext);
-    void get_iv(const std::string &encoded_opdata, unsigned char iv[IV_LENGTH]);
-    void encrypt_opdata(const std::string &plaintext, const unsigned char iv[], const unsigned char key[], std::string &encoded_opdata);
+    void verify_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key);
+    void decrypt_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key, std::string &plaintext);
+    void get_iv(const std::string &encoded_opdata, CryptoPP::SecByteBlock &iv);
+    void encrypt_opdata(const std::string &plaintext, const CryptoPP::SecByteBlock &iv, const CryptoPP::SecByteBlock &key, std::string &encoded_opdata);
 };
 
 }

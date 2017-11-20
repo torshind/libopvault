@@ -32,7 +32,7 @@ using namespace std;
 namespace OPVault {
 
 void FolderEntry::decrypt_overview() {
-    decrypt_opdata(o, (unsigned char*) overview_key, decrypted_overview);
+    decrypt_opdata(o, overview_key, decrypted_overview);
 }
 
 }

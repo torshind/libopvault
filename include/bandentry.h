@@ -94,7 +94,7 @@ private:
     bool updateState;
 
     void verify_key();
-    void decrypt_key(std::string &key);
+    void decrypt_key(CryptoPP::SecByteBlock &key);
     void init();
     void generate_hmac() {}
     void encrypt_overview() {}

@@ -27,7 +27,9 @@ SOFTWARE.
 #include <cryptopp/base64.h>
 #include <cryptopp/pwdbased.h>
 #include <cryptopp/sha.h>
+#include <cryptopp/sha3.h>
 
+#include "const.h"
 #include "profileentry.h"
 
 using namespace std;
@@ -39,11 +41,11 @@ void ProfileEntry::derive_keys(const std::string &master_password) {
     string salt;
     StringSource(this->salt, true, new Base64Decoder(new StringSink(salt)));
 
-    const byte* master_password_byte = (const byte*) master_password.data();
-    const byte* salt_byte = (const byte*) salt.data();
-
     PKCS5_PBKDF2_HMAC<SHA512> pbkdf2;
-    pbkdf2.DeriveKey(derived_key, KEY_LENGTH, 0, master_password_byte, master_password.length(), salt_byte, salt.length(), iterations);
+    pbkdf2.DeriveKey(derived_key, KEY_LENGTH, 0,
+                     reinterpret_cast<const unsigned char *> (master_password.data()), master_password.length(),
+                     reinterpret_cast<const unsigned char *> (salt.data()), salt.length(),
+                     iterations);
 
     try {
         verify_opdata(overviewKey, derived_key);
@@ -53,11 +55,11 @@ void ProfileEntry::derive_keys(const std::string &master_password) {
     }
 }
 
-void ProfileEntry::get_profile_key(const std::string &encoded_key_opdata, unsigned char profile_key[]) {
+void ProfileEntry::get_profile_key(const std::string &encoded_key_opdata, SecByteBlock &profile_key) {
     string opdata_key;
     decrypt_opdata(encoded_key_opdata, derived_key, opdata_key);
 
-    SHA512().CalculateDigest(profile_key, (const byte*) opdata_key.data(), opdata_key.length());
+    SHA512().CalculateDigest(profile_key, reinterpret_cast<const unsigned char *> (opdata_key.data()), opdata_key.length());
 }
 
 void ProfileEntry::get_master_key() {

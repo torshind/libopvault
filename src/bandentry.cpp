@@ -47,35 +47,27 @@ void BandEntry::verify_key() {
     // TODO: verify key using master mac key
 }
 
-void BandEntry::decrypt_key(std::string &key) {
+void BandEntry::decrypt_key(SecByteBlock &key) {
     string encrypted_key;
     StringSource(k, true, new Base64Decoder(new StringSink(encrypted_key)));
 
-    const byte* key_byte = (byte*) encrypted_key.data();
+    SecByteBlock iv(reinterpret_cast<const unsigned char *> (encrypted_key.data()), AES::BLOCKSIZE);
 
-    byte iv[IV_LENGTH] = "";
-    memcpy(iv, key_byte, IV_LENGTH*sizeof(byte));
+    string ciphertext = string(encrypted_key.data()+AES::BLOCKSIZE, ITEM_KEY_LENGTH);
 
-    byte *ciphertext = NULL;
-    ciphertext = (byte*) calloc(ITEM_KEY_LENGTH, sizeof(byte));
-    memcpy(ciphertext, key_byte+IV_LENGTH, ITEM_KEY_LENGTH*sizeof(byte));
+    CBC_Mode<AES>::Decryption decryption(master_key, ENC_KEY_LENGTH, iv);
 
-    AES::Decryption aes_decryption(master_key, ENC_KEY_LENGTH);
-    CBC_Mode_ExternalCipher::Decryption cbc_decryption(aes_decryption, iv);
-
-    StreamTransformationFilter stf_decryptor(cbc_decryption, new StringSink(key), StreamTransformationFilter::NO_PADDING);
-
-    stf_decryptor.Put((const byte *)ciphertext, ITEM_KEY_LENGTH);
-    stf_decryptor.MessageEnd();
+    key = SecByteBlock(ITEM_KEY_LENGTH);
+    StringSource(ciphertext, true, new StreamTransformationFilter(decryption, new ArraySink(key.data(), key.size()), StreamTransformationFilter::NO_PADDING));
 }
 
 void BandEntry::decrypt_data(std::string& data) {
     string decrypted_data;
-    string item_key;
+    SecByteBlock item_key;
 
     decrypt_key(item_key);
 
-    decrypt_opdata(d, reinterpret_cast<const unsigned char *> (item_key.data()), data);
+    decrypt_opdata(d, item_key, data);
 }
 
 void BandEntry::decrypt_overview(std::string& overview) {
@@ -105,26 +97,23 @@ void BandEntry::init() {
     SecByteBlock plain_key(ITEM_KEY_LENGTH);
     prng.GenerateBlock(plain_key, plain_key.size());
 
-    SecByteBlock iv(IV_LENGTH);
+    SecByteBlock iv(AES::BLOCKSIZE);
     prng.GenerateBlock(iv, iv.size());
 
     // Encryption
-    AES::Encryption aes_encryption(master_key, ENC_KEY_LENGTH);
-    CBC_Mode_ExternalCipher::Encryption cbc_encryption(aes_encryption, iv);
+    CBC_Mode<AES>::Encryption encryption(master_key, ENC_KEY_LENGTH, iv);
 
-    StreamTransformationFilter stf_encryptor(cbc_encryption, new StringSink(encrypted_key), StreamTransformationFilter::NO_PADDING);
-    stf_encryptor.Put(plain_key, ITEM_KEY_LENGTH);
-    stf_encryptor.MessageEnd();
+    ArraySource(plain_key.data(), plain_key.size(), true, new StreamTransformationFilter(encryption, new StringSink(encrypted_key), StreamTransformationFilter::NO_PADDING));
 
     // HMAC
     string mac;
 
-    HMAC<SHA256> hmac(plain_key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+    HMAC<SHA256> hmac(master_key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 
-    StringSource(string(reinterpret_cast<const char *> (iv.data()), IV_LENGTH) + encrypted_key, true, new HashFilter(hmac, new StringSink(mac)));
+    StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key, true, new HashFilter(hmac, new StringSink(mac)));
 
     // Base64 encoding
-    StringSource(string(reinterpret_cast<const char *> (iv.data()), IV_LENGTH) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
+    StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
 
     // TODO: timestamps
 }
@@ -135,20 +124,21 @@ void BandEntry::set_data(string _d) {
         init();
     }
 
-    string item_key;
-    unsigned char iv[IV_LENGTH];
+    SecByteBlock item_key;
+    SecByteBlock iv;
 
     decrypt_key(item_key);
 
     if (d.empty()) {
         // Generate iv
         AutoSeededRandomPool prng;
-        prng.GenerateBlock(iv, IV_LENGTH);
+        iv = SecByteBlock(AES::BLOCKSIZE);
+        prng.GenerateBlock(iv, AES::BLOCKSIZE);
     } else {
         get_iv(d, iv);
     }
 
-    encrypt_opdata(_d, iv, reinterpret_cast<const unsigned char *> (item_key.data()), d);
+    encrypt_opdata(_d, iv, item_key, d);
 }
 
 }

@@ -71,12 +71,12 @@ private:
     std::string salt;
     std::string passwordHint;
     std::string masterKey;
-    int iterations;
+    unsigned int iterations;
     std::string uuid;
     std::string overviewKey;
     int createdAt;
 
-    void get_profile_key(const std::string &encoded_key_opdata, unsigned char profile_key[]);
+    void get_profile_key(const std::string &encoded_key_opdata, CryptoPP::SecByteBlock &profile_key);
 };
 
 }
