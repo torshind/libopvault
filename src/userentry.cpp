@@ -41,6 +41,8 @@ void UserEntry::decrypt_overview(std::string& overview) {
 }
 
 void UserEntry::init() {
+    created = time(nullptr);
+
     // Generate UUID
     uuid_t uuid_bin;
     char uuid_str[37];
@@ -51,7 +53,8 @@ void UserEntry::init() {
     uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
 }
 
-void UserEntry::set_overview(std::string _o) {
+void UserEntry::set_overview(const std::string _o) {
+    updated = time(nullptr);
     updateState = true;
     if (uuid.empty()) {
         init();

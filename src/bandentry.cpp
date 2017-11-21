@@ -99,11 +99,10 @@ void BandEntry::init() {
 
     // Base64 encoding
     StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
-
-    // TODO: timestamps
 }
 
-void BandEntry::set_data(string _d) {
+void BandEntry::set_data(const string _d) {
+    updated = time(nullptr);
     updateState = true;
     if (uuid.empty()) {
         init();

@@ -44,9 +44,9 @@ public:
     std::string get_category() { return category; }
     std::string get_folder() { return folder; }
 
-    void set_category(std::string _category) {}
-    void set_data(std::string _d);
-    void set_folder(std::string _folder) {}
+    void set_category(const std::string _category) { category = _category; }
+    void set_data(const std::string _d);
+    void set_folder(const std::string _folder) { folder = _folder; }
 
     void decrypt_data(std::string& data);
     void verify();

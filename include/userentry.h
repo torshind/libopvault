@@ -27,15 +27,15 @@ public:
     std::string get_overview() { return o; }
     std::string get_uuid() { return uuid; }
 
-    void set_overview(std::string _o);
+    void set_overview(const std::string _o);
 
     void decrypt_overview(std::string& overview);
 
 protected:
-    int created;
+    long created;
     std::string o;
-    int tx;
-    int updated;
+    long tx;
+    long updated;
     std::string uuid;
 
     bool updateState;
