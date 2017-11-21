@@ -39,15 +39,15 @@ public:
     ProfileEntry() {}
 
     ProfileEntry(std::string _lastUpdatedBy,
-                 int _updatedAt,
+                 long _updatedAt,
                  std::string _profileName,
                  std::string _salt,
                  std::string _passwordHint,
                  std::string _masterKey,
-                 int _iterations,
+                 unsigned int _iterations,
                  std::string _uuid,
                  std::string _overviewKey,
-                 int _createdAt) :
+                 long _createdAt) :
         lastUpdatedBy(_lastUpdatedBy),
         updatedAt(_updatedAt),
         profileName(_profileName),
@@ -66,7 +66,7 @@ public:
 
 private:
     std::string lastUpdatedBy;
-    int updatedAt;
+    long updatedAt;
     std::string profileName;
     std::string salt;
     std::string passwordHint;
@@ -74,7 +74,7 @@ private:
     unsigned int iterations;
     std::string uuid;
     std::string overviewKey;
-    int createdAt;
+    long createdAt;
 
     void get_profile_key(const std::string &encoded_key_opdata, CryptoPP::SecByteBlock &profile_key);
 };

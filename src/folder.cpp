@@ -40,14 +40,13 @@ void Folder::read() {
     }
     catch (...) {
         throw;
-        return;
     }
 
     for(json::iterator it = data.begin(); it !=data.end(); ++it) {
-        FolderEntry folder = FolderEntry( (*it)["created"],
+        FolderEntry folder = FolderEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
                                           (*it)["overview"].is_string() ? (*it)["overview"].get<string>() : "NULL",
-                                          (*it)["tx"],
-                                          (*it)["updated"],
+                                          (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
+                                          (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
                                           (*it)["uuid"].is_string() ? (*it)["uuid"].get<string>() : "NULL" );
         folders.push_back(folder);
     }
@@ -65,8 +64,8 @@ void Folder::insert_entry(FolderEntry &folder) {
                       folder.updated,
                       folder.uuid.c_str()) + 1;
     char *buf;
-    buf = (char*) malloc(sz);
-    snprintf(buf, sz, SQL_REPLACE_FOLDERS_ENTRY,
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_REPLACE_FOLDERS_ENTRY,
              folder.created,
              folder.o.c_str(),
              folder.tx,

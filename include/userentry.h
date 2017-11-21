@@ -7,12 +7,14 @@ namespace OPVault {
 
 class UserEntry : protected BaseEntry {
 protected:
-    UserEntry() {}
+    UserEntry() {
+        tx = 0;
+    }
 
-    UserEntry(int _created,
+    UserEntry(long _created,
               std::string _o,
-              int _tx,
-              int _updated,
+              long _tx,
+              long _updated,
               std::string _uuid) :
         created(_created),
         o(_o),
@@ -22,6 +24,8 @@ protected:
     {}
 
     virtual void init();
+
+    virtual ~UserEntry() {}
 
 public:
     std::string get_overview() { return o; }

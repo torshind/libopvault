@@ -39,18 +39,17 @@ void Profile::read() {
     }
     catch (...) {
         throw;
-        return;
     }
     profile = ProfileEntry( data["lastUpdatedBy"].is_string() ? data["lastUpdatedBy"].get<string>() : "NULL",
-                            data["updatedAt"],
+                            data["updatedAt"].is_number_integer() ? data["updatedAt"].get<long>() : -1,
                             data["profileName"].is_string() ? data["profileName"].get<string>() : "NULL",
                             data["salt"].is_string() ? data["salt"].get<string>() : "NULL",
                             data["passwordHint"].is_string() ? data["passwordHint"].get<string>() : "NULL",
                             data["masterKey"].is_string() ? data["masterKey"].get<string>() : "NULL",
-                            data["iterations"],
+                            data["iterations"].is_number_integer() ? data["iterations"].get<unsigned int>() : 0,
                             data["uuid"].is_string() ? data["uuid"].get<string>() : "NULL",
                             data["overviewKey"].is_string() ? data["overviewKey"].get<string>() : "NULL",
-                            data["createdAt"] );
+                            data["createdAt"].is_number_integer() ? data["createdAt"].get<long>() : -1 );
 }
 
 int Profile::read_updatedAt() {
@@ -59,7 +58,6 @@ int Profile::read_updatedAt() {
     }
     catch (...) {
         throw;
-        return 0;
     }
     return data["updatedAt"];
 }
@@ -81,8 +79,8 @@ void Profile::insert_entry() {
                       profile.overviewKey.c_str(),
                       profile.createdAt) + 1;
     char *buf;
-    buf = (char*) malloc(sz);
-    snprintf(buf, sz, SQL_INSERT_PROFILE_ENTRY,
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_INSERT_PROFILE_ENTRY,
              profile.lastUpdatedBy.c_str(),
              profile.updatedAt,
              profile.profileName.c_str(),

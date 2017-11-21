@@ -103,7 +103,7 @@ void Vault::get_profile() {
     }
 
     sqlite3_stmt *stmt;
-    if (rc = sqlite3_prepare_v2(db, SQL_SELECT_PROFILE, -1, &stmt, NULL) != SQLITE_OK) {
+    if ((rc = sqlite3_prepare_v2(db, SQL_SELECT_PROFILE, -1, &stmt, nullptr)) != SQLITE_OK) {
         ostringstream os;
         os << "libopvault: SQL prepare error - error code: " << rc;
         sqlite3_close(db);
@@ -124,7 +124,7 @@ void Vault::get_profile() {
         profile.salt = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
         profile.passwordHint = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
         profile.masterKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
-        profile.iterations = sqlite3_column_int(stmt, 6);
+        profile.iterations = (unsigned int) sqlite3_column_int(stmt, 6);
         profile.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
         profile.overviewKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
         profile.createdAt = sqlite3_column_int(stmt, 9);
@@ -199,7 +199,7 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) {
     }
 
     sqlite3_stmt *stmt;
-    if (sqlite3_prepare_v2(db, query, -1, &stmt, NULL) != SQLITE_OK)
+    if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK)
         cout << "SQL prepare error" << endl;
     else {
         for (;;) {
@@ -220,9 +220,11 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) {
             item.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
             item.category = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
             item.d = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-            item.folder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-            item.hmac = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
-            item.k = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
+            item.fave = (unsigned long) sqlite3_column_int(stmt, 7);
+            item.folder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
+            item.hmac = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
+            item.k = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10));
+            item.trashed = sqlite3_column_int(stmt, 11);
             items.push_back(item);
         }
         sqlite3_finalize(stmt);
@@ -277,8 +279,8 @@ void Vault::set_items(const vector<BandEntry> &items) {
 void Vault::get_items_folder(string folder, std::vector<BandEntry> &items) {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_FOLDER, folder.c_str()) + 1;
     char *buf;
-    buf = (char*) malloc(sz);
-    snprintf(buf, sz, SQL_SELECT_ITEMS_FOLDER, folder.c_str());
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_SELECT_ITEMS_FOLDER, folder.c_str());
 
     get_items_query(buf, items);
     free(buf);
@@ -287,8 +289,8 @@ void Vault::get_items_folder(string folder, std::vector<BandEntry> &items) {
 void Vault::get_items_category(string category, std::vector<BandEntry> &items) {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_CATEGORY, category.c_str()) + 1;
     char *buf;
-    buf = (char*) malloc(sz);
-    snprintf(buf, sz, SQL_SELECT_ITEMS_CATEGORY, category.c_str());
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_SELECT_ITEMS_CATEGORY, category.c_str());
 
     get_items_query(buf, items);
     free(buf);

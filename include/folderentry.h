@@ -36,10 +36,10 @@ class FolderEntry : public UserEntry {
 public:
     FolderEntry() {}
 
-    FolderEntry(int _created,
+    FolderEntry(long _created,
                 std::string _o,
-                int _tx,
-                int _updated,
+                long _tx,
+                long _updated,
                 std::string _uuid) :
         UserEntry(_created,
                   _o,

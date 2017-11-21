@@ -52,16 +52,18 @@ void Band::read() {
         for(json::iterator it=data.begin(); it!=data.end(); ++it) {
             BandEntry item;
             try {
-                item = BandEntry( (*it)["created"],
+                item = BandEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
                                   (*it)["o"].is_string() ? (*it)["o"].get<string>() : "NULL",
-                                  (*it)["tx"],
-                                  (*it)["updated"],
+                                  (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
+                                  (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
                                   (*it)["uuid"].is_string() ? (*it)["uuid"].get<string>() : "NULL",
                                   (*it)["category"].is_string() ? (*it)["category"].get<string>() : "NULL",
                                   (*it)["d"].is_string() ? (*it)["d"].get<string>() : "NULL",
+                                  (*it)["fave"].is_number_integer() ? (*it)["fave"].get<unsigned long>() : 0,
                                   (*it)["folder"].is_string() ? (*it)["folder"].get<string>() : "NULL",
                                   (*it)["hmac"].is_string() ? (*it)["hmac"].get<string>() : "NULL",
-                                  (*it)["k"].is_string() ? (*it)["k"].get<string>() : "NULL" );
+                                  (*it)["k"].is_string() ? (*it)["k"].get<string>() : "NULL",
+                                  (*it)["trashed"].is_boolean() ? (*it)["trashed"].get<int>() : -1 );
             }
             catch (...) {
                 throw;
@@ -84,12 +86,14 @@ void Band::insert_entry(BandEntry &item) {
                       item.uuid.c_str(),
                       item.category.c_str(),
                       item.d.c_str(),
+                      item.fave,
                       item.folder.c_str(),
                       item.hmac.c_str(),
-                      item.k.c_str()) + 1;
+                      item.k.c_str(),
+                      item.trashed) + 1;
     char *buf;
-    buf = (char*) malloc(sz);
-    snprintf(buf, sz, SQL_REPLACE_ITEMS_ENTRY,
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_REPLACE_ITEMS_ENTRY,
              item.created,
              item.o.c_str(),
              item.tx,
@@ -97,9 +101,11 @@ void Band::insert_entry(BandEntry &item) {
              item.uuid.c_str(),
              item.category.c_str(),
              item.d.c_str(),
+             item.fave,
              item.folder.c_str(),
              item.hmac.c_str(),
-             item.k.c_str());
+             item.k.c_str(),
+             item.trashed);
 
     DBGVAR(item.uuid);
 

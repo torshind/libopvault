@@ -38,30 +38,35 @@ class BandEntry : public UserEntry {
 
 public:
     BandEntry() {
+        fave = 0;
+        trashed = -1;
         updateState = false;
     }
 
     std::string get_category() { return category; }
     std::string get_folder() { return folder; }
 
-    void set_category(const std::string _category) { category = _category; }
+    void set_category(const std::string _category) { category = _category; updateState = true; }
     void set_data(const std::string _d);
-    void set_folder(const std::string _folder) { folder = _folder; }
+    void set_fave(const unsigned long _fave) { fave = _fave; updateState = true; }
+    void set_folder(const std::string _folder) { folder = _folder; updateState = true; }
+    void set_trashed(const int _trashed) { trashed = _trashed; updateState = true; }
 
     void decrypt_data(std::string& data);
-    void verify();
 
 private:
-    BandEntry(int _created,
+    BandEntry(long _created,
               std::string _o,
-              int _tx,
-              int _updated,
+              long _tx,
+              long _updated,
               std::string _uuid,
               std::string _category,
               std::string _d,
+              unsigned long _fave,
               std::string _folder,
               std::string _hmac,
-              std::string _k) :
+              std::string _k,
+              int _trashed) :
         UserEntry(_created,
                   _o,
                   _tx,
@@ -69,23 +74,29 @@ private:
                   _uuid),
         category(_category),
         d(_d),
+        fave(_fave),
         folder(_folder),
         hmac(_hmac),
-        k(_k)
+        k(_k),
+        trashed(_trashed)
     {
         updateState = false;
     }
 
     std::string category;
     std::string d;
+    unsigned long fave;
     std::string folder;
     std::string hmac;
     std::string k;
+    int trashed;
 
+    std::string hmac_in_str();
+    void verify();
     void verify_key();
     void decrypt_key(CryptoPP::SecByteBlock &key);
     void init();
-    void generate_hmac() {}
+    void generate_hmac();
 };
 
 }

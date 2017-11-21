@@ -60,6 +60,7 @@ void BandEntry::decrypt_key(SecByteBlock &key) {
 }
 
 void BandEntry::decrypt_data(std::string& data) {
+    verify();
     string decrypted_data;
     SecByteBlock item_key;
 
@@ -68,8 +69,33 @@ void BandEntry::decrypt_data(std::string& data) {
     decrypt_opdata(d, item_key, data);
 }
 
+std::string BandEntry::hmac_in_str() {
+    return string(
+                "category" + category +
+                "created" + to_string(created) +
+                "d" + d +
+                (fave == 0 ? "" : "fave" + to_string(fave)) +
+                (folder == "NULL" ? "" : "folder" + folder) +
+                "k" + k +
+                "o" + o +
+                (trashed == -1 ? "" : "trashed" + to_string(trashed)) +
+                "tx" + to_string(tx) +
+                "updated" + to_string(updated) +
+                "uuid" + uuid
+                );
+}
+
 void BandEntry::verify() {
-    // TODO: verify item using hmac and overview mac key
+    string input;
+    StringSource(hmac, true, new Base64Decoder(new StringSink(input)));
+
+    HMAC<SHA256> _hmac(overview_key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+
+    input = hmac_in_str() + input;
+
+    const int flags = HashVerificationFilter::THROW_EXCEPTION | HashVerificationFilter::HASH_AT_END;
+
+    StringSource(input, true, new HashVerificationFilter(_hmac, nullptr, flags));
 }
 
 void BandEntry::init() {
@@ -93,9 +119,9 @@ void BandEntry::init() {
     // HMAC
     string mac;
 
-    HMAC<SHA256> hmac(master_key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+    HMAC<SHA256> _hmac(master_key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 
-    StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key, true, new HashFilter(hmac, new StringSink(mac)));
+    StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key, true, new HashFilter(_hmac, new StringSink(mac)));
 
     // Base64 encoding
     StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
@@ -123,6 +149,19 @@ void BandEntry::set_data(const string _d) {
     }
 
     encrypt_opdata(_d, iv, item_key, d);
+}
+
+void BandEntry::generate_hmac() {
+    // HMAC
+    string mac;
+    string input = hmac_in_str();
+
+    HMAC<SHA256> _hmac(overview_key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+
+    StringSource(input, true, new HashFilter(_hmac, new StringSink(mac)));
+
+    // Base64 encoding
+    StringSource(mac, true, new Base64Encoder(new StringSink(hmac)));
 }
 
 }
