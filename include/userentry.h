@@ -21,6 +21,8 @@ protected:
         uuid(_uuid)
     {}
 
+    virtual void init();
+
 public:
     std::string get_overview() { return o; }
     std::string get_uuid() { return uuid; }

@@ -58,7 +58,7 @@ void Folder::create_table() {
 }
 
 void Folder::insert_entry(FolderEntry &folder) {
-    int sz = snprintf(nullptr, 0, SQL_INSERT_FOLDERS_ENTRY,
+    int sz = snprintf(nullptr, 0, SQL_REPLACE_FOLDERS_ENTRY,
                       folder.created,
                       folder.o.c_str(),
                       folder.tx,
@@ -66,7 +66,7 @@ void Folder::insert_entry(FolderEntry &folder) {
                       folder.uuid.c_str()) + 1;
     char *buf;
     buf = (char*) malloc(sz);
-    snprintf(buf, sz, SQL_INSERT_FOLDERS_ENTRY,
+    snprintf(buf, sz, SQL_REPLACE_FOLDERS_ENTRY,
              folder.created,
              folder.o.c_str(),
              folder.tx,
@@ -82,6 +82,14 @@ void Folder::insert_entry(FolderEntry &folder) {
 void Folder::insert_all_entries() {
     for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
         insert_entry(*it);
+    }
+}
+
+void Folder::insert_all_entries(std::vector<FolderEntry> folders) {
+    for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
+        if (it->updateState) {
+            insert_entry(*it);
+        }
     }
 }
 

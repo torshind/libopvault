@@ -95,8 +95,8 @@ const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
                                   "updated  INT  NOT NULL," \
                                   "uuid     CHAR(32) PRIMARY KEY NOT NULL );";
 
-const char SQL_INSERT_FOLDERS_ENTRY[] = "INSERT INTO Folders (created, o, tx, updated, uuid) "  \
-                                        "VALUES (%d, '%s', %d, %d, '%s');";
+const char SQL_REPLACE_FOLDERS_ENTRY[] = "INSERT OR REPLACE INTO Folders (created, o, tx, updated, uuid) "  \
+                                         "VALUES (%d, '%s', %d, %d, '%s');";
 
 const char SQL_SELECT_PROFILE[] = "SELECT * from Profile";
 const char SQL_SELECT_FOLDERS[] = "SELECT * from Folders";

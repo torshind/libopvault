@@ -30,8 +30,6 @@ SOFTWARE.
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
-#include <uuid/uuid.h>
-
 #include "dbg.h"
 #include "const.h"
 #include "vault.h"
@@ -75,14 +73,7 @@ void BandEntry::verify() {
 }
 
 void BandEntry::init() {
-    // Generate UUID
-    uuid_t uuid_bin;
-    char uuid_str[37];
-
-    uuid_generate(uuid_bin);
-    uuid_unparse_upper(uuid_bin, uuid_str);
-    uuid = string(uuid_str);
-    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
+    UserEntry::init();
 
     // Generate key
     AutoSeededRandomPool prng;
@@ -114,7 +105,7 @@ void BandEntry::init() {
 
 void BandEntry::set_data(string _d) {
     updateState = true;
-    if (k.empty()) {
+    if (uuid.empty()) {
         init();
     }
 

@@ -25,6 +25,8 @@ SOFTWARE.
 
 #include <cryptopp/osrng.h>
 
+#include <uuid/uuid.h>
+
 #include "userentry.h"
 
 using namespace std;
@@ -38,8 +40,22 @@ void UserEntry::decrypt_overview(std::string& overview) {
     decrypt_opdata(o, overview_key, overview);
 }
 
+void UserEntry::init() {
+    // Generate UUID
+    uuid_t uuid_bin;
+    char uuid_str[37];
+
+    uuid_generate(uuid_bin);
+    uuid_unparse_upper(uuid_bin, uuid_str);
+    uuid = string(uuid_str);
+    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
+}
+
 void UserEntry::set_overview(std::string _o) {
     updateState = true;
+    if (uuid.empty()) {
+        init();
+    }
 
     SecByteBlock iv;
 

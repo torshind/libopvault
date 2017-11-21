@@ -180,6 +180,11 @@ void Vault::get_folders(vector<FolderEntry> &folders) {
     sqlite3_close(db);
 }
 
+void Vault::set_folders(const vector<FolderEntry> &folders) {
+    Folder folder;
+    folder.insert_all_entries(folders);
+}
+
 void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) {
     sqlite3 *db;
     int rc;
@@ -264,11 +269,9 @@ void Vault::get_items(vector<BandEntry> &items) {
     get_items_query(SQL_SELECT_ITEMS, items);
 }
 
-void Vault::set_items(vector<BandEntry> &items) {
-    //update db
+void Vault::set_items(const vector<BandEntry> &items) {
     Band band;
     band.insert_all_entries(items);
-    //write file
 }
 
 void Vault::get_items_folder(string folder, std::vector<BandEntry> &items) {

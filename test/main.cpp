@@ -105,5 +105,11 @@ int main(int argc, char *argv[])
     items.push_back(item);
     vault.set_items(items);
 
+    // INSERT NEW FOLDER
+    FolderEntry folder;
+    folder.set_overview("{\"title\":\"Mordor\"}");
+    folders.push_back(folder);
+    vault.set_folders(folders);
+
     return 0;
 }
