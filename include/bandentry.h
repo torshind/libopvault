@@ -28,53 +28,78 @@ SOFTWARE.
 
 #include <vector>
 
-#include "baseentry.h"
+#include "userentry.h"
 
 namespace OPVault {
 
-struct BandEntry : BaseEntry {
-    int created;
-    std::string o;
-    int tx;
-    int updated;
-    std::string uuid;
-    std::string category;
-    std::string d;
-    std::string folder;
-    std::string hmac;
-    std::string k;
+class BandEntry : public UserEntry {
+    friend class Vault;
+    friend class Band;
 
-    std::string decrypted_overview;
-    std::string decrypted_data;
+public:
+    BandEntry() {
+        fave = 0;
+        folder = "NULL";
+        trashed = -1;
+        updateState = false;
+    }
 
-    BandEntry() {}
-    BandEntry(int _created,
+    std::string get_category() { return category; }
+    unsigned long get_fave() { return fave; }
+    std::string get_folder() { return folder; }
+    int get_trashed() { return trashed; }
+
+    void set_category(const std::string _category);
+    void set_data(const std::string _d);
+    void set_fave(const unsigned long _fave);
+    void set_folder(const std::string _folder);
+    void set_trashed(const int _trashed);
+
+    void decrypt_data(std::string& data);
+
+private:
+    BandEntry(long _created,
               std::string _o,
-              int _tx,
-              int _updated,
+              long _tx,
+              long _updated,
               std::string _uuid,
               std::string _category,
               std::string _d,
+              unsigned long _fave,
               std::string _folder,
               std::string _hmac,
-              std::string _k) :
-        created(_created),
-        o(_o),
-        tx(_tx),
-        updated(_updated),
-        uuid(_uuid),
+              std::string _k,
+              int _trashed) :
+        UserEntry(_created,
+                  _o,
+                  _tx,
+                  _updated,
+                  _uuid),
         category(_category),
         d(_d),
+        fave(_fave),
         folder(_folder),
         hmac(_hmac),
-        k(_k)
-    {}
+        k(_k),
+        trashed(_trashed)
+    {
+        updateState = false;
+    }
 
-    void decrypt_data();
-    void decrypt_overview();
+    std::string category;
+    std::string d;
+    unsigned long fave;
+    std::string folder;
+    std::string hmac;
+    std::string k;
+    int trashed;
 
-private:
-    void decrypt_key(std::string &key);
+    std::string hmac_in_str();
+    void verify();
+    void verify_key();
+    void decrypt_key(CryptoPP::SecByteBlock &key);
+    void init();
+    void generate_hmac();
 };
 
 }

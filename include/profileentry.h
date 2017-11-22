@@ -30,31 +30,24 @@ SOFTWARE.
 
 namespace OPVault {
 
-struct ProfileEntry : public BaseEntry
+class ProfileEntry : public BaseEntry
 {
-    std::string lastUpdatedBy;
-    int updatedAt;
-    std::string profileName;
-    std::string salt;
-    std::string passwordHint;
-    std::string masterKey;
-    int iterations;
-    std::string uuid;
-    std::string overviewKey;
-    int createdAt;
+    friend class Vault;
+    friend class Profile;
 
+public:
     ProfileEntry() {}
 
     ProfileEntry(std::string _lastUpdatedBy,
-                 int _updatedAt,
+                 long _updatedAt,
                  std::string _profileName,
                  std::string _salt,
                  std::string _passwordHint,
                  std::string _masterKey,
-                 int _iterations,
+                 unsigned int _iterations,
                  std::string _uuid,
                  std::string _overviewKey,
-                 int _createdAt) :
+                 long _createdAt) :
         lastUpdatedBy(_lastUpdatedBy),
         updatedAt(_updatedAt),
         profileName(_profileName),
@@ -72,7 +65,18 @@ struct ProfileEntry : public BaseEntry
     void get_overview_key();
 
 private:
-    void get_profile_key(const std::string &encoded_key_opdata, unsigned char profile_key[]);
+    std::string lastUpdatedBy;
+    long updatedAt;
+    std::string profileName;
+    std::string salt;
+    std::string passwordHint;
+    std::string masterKey;
+    unsigned int iterations;
+    std::string uuid;
+    std::string overviewKey;
+    long createdAt;
+
+    void get_profile_key(const std::string &encoded_key_opdata, CryptoPP::SecByteBlock &profile_key);
 };
 
 }

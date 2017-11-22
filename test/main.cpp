@@ -29,6 +29,7 @@ SOFTWARE.
 #include "profile.h"
 #include "folder.h"
 #include "band.h"
+#include "baseentry.h"
 
 using namespace std;
 using namespace OPVault;
@@ -39,42 +40,122 @@ int main(int argc, char *argv[])
     string cloud_data_dir = "./onepassword_data/default";
     string local_data_dir = "./";
 
+    // OPEN VAULT
     Vault vault(cloud_data_dir, local_data_dir, master_password);
 
+    // GET FOLDER CONTENTS
     vector<FolderEntry> folders;
     vault.get_folders(folders);
     for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
-        it->decrypt_overview();
+        cout << "Folder " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
     }
 
     vector<BandEntry> items;
-    vault.get_items(items);
-    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
-        it->decrypt_overview();
-        it->decrypt_data();
-    }
 
+    // GET ITEMS BY FOLDER
     for(vector<FolderEntry>::iterator it1=folders.begin(); it1!=folders.end(); ++it1) {
-        cout << "Folder " << it1->uuid << endl;
+        cout << "Folder " << it1->get_uuid() << endl;
         items.clear();
-        vault.get_items_folder(it1->uuid, items);
+        vault.get_items_folder(it1->get_uuid(), items);
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->uuid << endl;
-            it2->decrypt_overview();
-            it2->decrypt_data();
+            cout << "Item " << it2->get_uuid() << endl;
+            string str;
+            it2->decrypt_overview(str);
+            cout << "Overview: " << str << endl;
+            it2->decrypt_data(str);
+            cout << "Data: " << str << endl;
         }
     }
 
+    // GET ITEMS BY CATEGORY
     for(unordered_map<string,string>::const_iterator it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
         cout << "Category " << it1->second << endl;
         items.clear();
         vault.get_items_category(it1->first, items);
         for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->uuid << endl;
-            it2->decrypt_overview();
-            it2->decrypt_data();
+            cout << "Item " << it2->get_uuid() << endl;
+            string str;
+            it2->decrypt_overview(str);
+            cout << "Overview: " << str << endl;
+            it2->decrypt_data(str);
+            cout << "Data: " << str << endl;
         }
     }
+
+    // GET ALL ITEMS
+    items.clear();
+    vault.get_items(items);
+    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+        cout << "Item " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
+        it->decrypt_data(str);
+        cout << "Data: " << str << endl;
+    }
+
+    // INSERT NEW ITEM
+    items.clear();
+    BandEntry item1;
+    item1.set_category("001");
+    items.push_back(item1);
+    BandEntry item2;
+    item2.set_data("{DATA2}");
+    items.push_back(item2);
+    BandEntry item3;
+    item3.set_folder("FOLDER3");
+    items.push_back(item3);
+    BandEntry item4;
+    item4.set_overview("{OVERVIEW4}");
+    items.push_back(item4);
+    BandEntry item5;
+    item5.set_fave(5000);
+    items.push_back(item5);
+    BandEntry item6;
+    item6.set_trashed(1);
+    items.push_back(item6);
+    BandEntry item7;
+    item7.set_category("099");
+    item7.set_data("{DATA7}");
+    item7.set_overview("{OVERVIEW7}");
+    items.push_back(item7);
+    vault.set_items(items);
+
+    // INSERT NEW FOLDER
+    FolderEntry folder;
+    folder.set_overview("{\"title\":\"Mordor\"}");
+    folders.push_back(folder);
+    vault.set_folders(folders);
+
+    // CHECK NEW DATA
+    folders.clear();
+    vault.get_folders(folders);
+    for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
+        cout << "Folder " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
+    }
+    items.clear();
+    vault.get_items(items);
+    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+        cout << "Item " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
+        it->decrypt_data(str);
+        cout << "Data: " << str << endl;
+        cout << "Category: " << it->get_category() << endl;
+        cout << "Fave: " << it->get_fave() << endl;
+        cout << "Folder: " << it->get_folder() << endl;
+        cout << "Trashed: " << it->get_trashed() << endl;
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
 
     return 0;
 }

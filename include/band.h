@@ -44,6 +44,7 @@ public:
     void create_table();
     void insert_entry(BandEntry &item);
     void insert_all_entries();
+    void insert_all_entries(std::vector<BandEntry> items);
 };
 
 }

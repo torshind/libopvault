@@ -23,39 +23,54 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef VAULT_H
-#define VAULT_H
+#include <cryptopp/osrng.h>
 
-#include <vector>
+#include <uuid/uuid.h>
 
-#include "profile.h"
-#include "folder.h"
-#include "band.h"
+#include "userentry.h"
+
+using namespace std;
+using namespace CryptoPP;
 
 namespace OPVault {
 
-class Vault
-{
-public:
-    Vault(const std::string &cloud_data_dir, const std::string &local_data_dir, const std::string &master_password);
-
-private:
-    ProfileEntry profile;
-
-    void get_profile();
-    void get_items_query(const char query[], std::vector<BandEntry> &items);
-    void create_db(const std::string &cloud_data_dir);
-
-public:
-    void get_folders(std::vector<FolderEntry> &folders);
-    void set_folders(const std::vector<FolderEntry> &folders);
-    void get_items(std::vector<BandEntry> &items);
-    void set_items(const std::vector<BandEntry> &items);
-    void get_items_folder(std::string folder, std::vector<BandEntry> &items);
-    void get_items_category(std::string category, std::vector<BandEntry> &items);
-    static void sql_exec(const char sql[]);
-};
-
+void UserEntry::decrypt_overview(std::string& overview) {
+    if (!o.empty()) {
+        decrypt_opdata(o, overview_key, overview);
+    }
 }
 
-#endif // VAULT_H
+void UserEntry::init() {
+    created = time(nullptr);
+
+    // Generate UUID
+    uuid_t uuid_bin;
+    char uuid_str[37];
+
+    uuid_generate(uuid_bin);
+    uuid_unparse_upper(uuid_bin, uuid_str);
+    uuid = string(uuid_str);
+    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
+}
+
+void UserEntry::set_overview(const std::string _o) {
+    updated = time(nullptr);
+    updateState = true;
+    if (uuid.empty()) {
+        init();
+    }
+
+    SecByteBlock iv;
+
+    if (o.empty()) {
+        // Generate iv
+        AutoSeededRandomPool prng;
+        iv = SecByteBlock(AES::BLOCKSIZE);
+        prng.GenerateBlock(iv, AES::BLOCKSIZE);
+    } else {
+        get_iv(o, iv);
+    }
+    encrypt_opdata(_o, iv, overview_key, o);
+}
+
+}

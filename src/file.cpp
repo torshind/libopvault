@@ -56,7 +56,6 @@ void File::read(const std::string &filename) {
     }
     else {
         throw std::runtime_error(string("libopvault: unable to read file ") + directory + "/" + filename);
-        return;
     }
     file_string = oss.str();
 
@@ -74,7 +73,6 @@ void File::read(const std::string &filename) {
     }
     catch (...) {
         throw;
-        return;
     }
 
 #ifndef NDEBUG
