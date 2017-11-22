@@ -39,18 +39,21 @@ class BandEntry : public UserEntry {
 public:
     BandEntry() {
         fave = 0;
+        folder = "NULL";
         trashed = -1;
         updateState = false;
     }
 
     std::string get_category() { return category; }
+    unsigned long get_fave() { return fave; }
     std::string get_folder() { return folder; }
+    int get_trashed() { return trashed; }
 
-    void set_category(const std::string _category) { category = _category; updateState = true; }
+    void set_category(const std::string _category);
     void set_data(const std::string _d);
-    void set_fave(const unsigned long _fave) { fave = _fave; updateState = true; }
-    void set_folder(const std::string _folder) { folder = _folder; updateState = true; }
-    void set_trashed(const int _trashed) { trashed = _trashed; updateState = true; }
+    void set_fave(const unsigned long _fave);
+    void set_folder(const std::string _folder);
+    void set_trashed(const int _trashed);
 
     void decrypt_data(std::string& data);
 

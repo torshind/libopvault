@@ -60,13 +60,14 @@ void BandEntry::decrypt_key(SecByteBlock &key) {
 }
 
 void BandEntry::decrypt_data(std::string& data) {
-    verify();
-    string decrypted_data;
-    SecByteBlock item_key;
+    if (!d.empty()) {
+        verify();
+        SecByteBlock item_key;
 
-    decrypt_key(item_key);
+        decrypt_key(item_key);
 
-    decrypt_opdata(d, item_key, data);
+        decrypt_opdata(d, item_key, data);
+    }
 }
 
 std::string BandEntry::hmac_in_str() {
@@ -127,6 +128,14 @@ void BandEntry::init() {
     StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
 }
 
+void BandEntry::set_category(const string _category) {
+    category = _category;
+    updateState = true;
+    if (uuid.empty()) {
+        init();
+    }
+}
+
 void BandEntry::set_data(const string _d) {
     updated = time(nullptr);
     updateState = true;
@@ -149,6 +158,30 @@ void BandEntry::set_data(const string _d) {
     }
 
     encrypt_opdata(_d, iv, item_key, d);
+}
+
+void BandEntry::set_fave(const unsigned long _fave) {
+    fave = _fave;
+    updateState = true;
+    if (uuid.empty()) {
+        init();
+    }
+}
+
+void BandEntry::set_folder(const string _folder) {
+    folder = _folder;
+    updateState = true;
+    if (uuid.empty()) {
+        init();
+    }
+}
+
+void BandEntry::set_trashed(const int _trashed) {
+    trashed = _trashed;
+    updateState = true;
+    if (uuid.empty()) {
+        init();
+    }
 }
 
 void BandEntry::generate_hmac() {

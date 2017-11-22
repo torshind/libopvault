@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
     items.clear();
     vault.get_items(items);
     for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+        cout << "Item " << it->get_uuid() << endl;
         string str;
         it->decrypt_overview(str);
         cout << "Overview: " << str << endl;
@@ -97,12 +98,30 @@ int main(int argc, char *argv[])
     }
 
     // INSERT NEW ITEM
-    BandEntry item;
-    item.set_category(CATEGORIES.find("001")->first);
-    item.set_data("{\"sections\":[{\"name\":\"\",\"title\":\"\",\"fields\":[{\"k\":\"string\",\"n\":\"org_name\",\"t\":\"group\"},{\"k\":\"URL\",\"n\":\"website\",\"v\":\"http://www.urbana.edu/resources/community/johnny-appleseed/appleseed-society.html\",\"t\":\"website\"},{\"k\":\"phone\",\"n\":\"phone\",\"t\":\"telephone\"},{\"k\":\"string\",\"n\":\"member_name\",\"v\":\"Wendy Appleseed\",\"t\":\"member name\"},{\"k\":\"monthYear\",\"n\":\"member_since\",\"t\":\"member since\"},{\"k\":\"monthYear\",\"n\":\"expiry_date\",\"v\":2625,\"t\":\"expiry date\"},{\"k\":\"string\",\"n\":\"membership_no\",\"v\":\"123456789\",\"t\":\"member ID\"},{\"k\":\"concealed\",\"n\":\"pin\",\"v\":\"B8HqCdCMAY8KxJqgWASD\",\"t\":\"password\"}]}]}");
-    item.set_folder("379A3A7E5D5A47A6AA3A69C4D1E57D1B");
-    item.set_overview("{\"title\":\"Tumblr\",\"URLs\":[{\"u\":\"http://www.tumblr.com/login\"}],\"ainfo\":\"peter@appleseed.com\",\"url\":\"http://www.tumblr.com/login\",\"tags\":[\"Sample\"],\"ps\":48}]");
-    items.push_back(item);
+    items.clear();
+    BandEntry item1;
+    item1.set_category("001");
+    items.push_back(item1);
+    BandEntry item2;
+    item2.set_data("{DATA2}");
+    items.push_back(item2);
+    BandEntry item3;
+    item3.set_folder("FOLDER3");
+    items.push_back(item3);
+    BandEntry item4;
+    item4.set_overview("{OVERVIEW4}");
+    items.push_back(item4);
+    BandEntry item5;
+    item5.set_fave(5000);
+    items.push_back(item5);
+    BandEntry item6;
+    item6.set_trashed(1);
+    items.push_back(item6);
+    BandEntry item7;
+    item7.set_category("099");
+    item7.set_data("{DATA7}");
+    item7.set_overview("{OVERVIEW7}");
+    items.push_back(item7);
     vault.set_items(items);
 
     // INSERT NEW FOLDER
@@ -110,6 +129,33 @@ int main(int argc, char *argv[])
     folder.set_overview("{\"title\":\"Mordor\"}");
     folders.push_back(folder);
     vault.set_folders(folders);
+
+    // CHECK NEW DATA
+    folders.clear();
+    vault.get_folders(folders);
+    for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
+        cout << "Folder " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
+    }
+    items.clear();
+    vault.get_items(items);
+    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+        cout << "Item " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
+        it->decrypt_data(str);
+        cout << "Data: " << str << endl;
+        cout << "Category: " << it->get_category() << endl;
+        cout << "Fave: " << it->get_fave() << endl;
+        cout << "Folder: " << it->get_folder() << endl;
+        cout << "Trashed: " << it->get_trashed() << endl;
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
 
     return 0;
 }

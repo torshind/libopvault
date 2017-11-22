@@ -35,9 +35,9 @@ using namespace CryptoPP;
 namespace OPVault {
 
 void UserEntry::decrypt_overview(std::string& overview) {
-    string decrypted_overview;
-
-    decrypt_opdata(o, overview_key, overview);
+    if (!o.empty()) {
+        decrypt_opdata(o, overview_key, overview);
+    }
 }
 
 void UserEntry::init() {
