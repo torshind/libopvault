@@ -148,13 +148,13 @@ void BandEntry::set_data(const string _d) {
 
     decrypt_key(item_key);
 
-    if (d.empty()) {
-        // Generate iv
-        AutoSeededRandomPool prng;
-        iv = SecByteBlock(AES::BLOCKSIZE);
-        prng.GenerateBlock(iv, AES::BLOCKSIZE);
-    } else {
-        get_iv(d, iv);
+    // Generate iv
+    AutoSeededRandomPool prng;
+    iv = SecByteBlock(AES::BLOCKSIZE);
+    prng.GenerateBlock(iv, AES::BLOCKSIZE);
+
+    if (!d.empty()) {
+        d.clear();
     }
 
     encrypt_opdata(_d, iv, item_key, d);

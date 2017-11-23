@@ -42,7 +42,6 @@ protected:
 
     void verify_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key);
     void decrypt_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key, std::string &plaintext);
-    void get_iv(const std::string &encoded_opdata, CryptoPP::SecByteBlock &iv);
     void encrypt_opdata(const std::string &plaintext, const CryptoPP::SecByteBlock &iv, const CryptoPP::SecByteBlock &key, std::string &encoded_opdata);
 };
 

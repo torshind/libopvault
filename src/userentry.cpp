@@ -62,14 +62,15 @@ void UserEntry::set_overview(const std::string _o) {
 
     SecByteBlock iv;
 
-    if (o.empty()) {
-        // Generate iv
-        AutoSeededRandomPool prng;
-        iv = SecByteBlock(AES::BLOCKSIZE);
-        prng.GenerateBlock(iv, AES::BLOCKSIZE);
-    } else {
-        get_iv(o, iv);
+    // Generate iv
+    AutoSeededRandomPool prng;
+    iv = SecByteBlock(AES::BLOCKSIZE);
+    prng.GenerateBlock(iv, AES::BLOCKSIZE);
+
+    if (!o.empty()) {
+        o.clear();
     }
+
     encrypt_opdata(_o, iv, overview_key, o);
 }
 

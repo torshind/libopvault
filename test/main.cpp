@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     vector<FolderEntry> folders;
     vector<BandEntry> items;
 
-    // INSERT NEW ITEM
+    // INSERT NEW ITEMS
     items.clear();
     BandEntry item1;
     item1.set_category("001");
@@ -165,6 +165,31 @@ int main(int argc, char *argv[])
     vault.set_folders(folders);
 
     // CHECK NEW DATA
+    get_folders(vault);
+    get_items(vault);
+
+    // MODIFY ITEMS
+    items[0].set_data("{DATA1.1}");
+    items[1].set_category("002");
+    items[1].set_data("{DATA2.2}");
+    items[2].set_overview("{OVERVIEW3.3}");
+    items[3].set_data("{DATA4.4}");
+    items[3].set_fave(4000);
+    items[3].set_overview("{OVERVIEW4.4}");
+    items[4].set_trashed(1);
+    items[5].set_category("005");
+    items[5].set_data("{DATA6.6}");
+    items[5].set_fave(6000);
+    items[5].set_folder("FOLDER6");
+    items[5].set_overview("{OVERVIEW6.6}");
+    items[5].set_trashed(0);
+    items[6].set_category("111");
+    items[6].set_data("{DATA7.7}");
+    items[6].set_overview("{OVERVIEW7.7}");
+
+    vault.set_items(items);
+
+    // CHECK MODIFIED DATA
     get_folders(vault);
     get_items(vault);
 

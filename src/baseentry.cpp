@@ -96,13 +96,6 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const SecByteB
     DBGVAR(plaintext);
 }
 
-void BaseEntry::get_iv(const std::string &encoded_opdata, SecByteBlock &iv) {
-    string opdata;
-    StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));
-
-    iv = SecByteBlock(reinterpret_cast<const unsigned char *> (opdata.data())+START_IV, AES::BLOCKSIZE);
-}
-
 void BaseEntry::encrypt_opdata(const std::string &plaintext, const SecByteBlock &iv, const SecByteBlock &key, std::string &encoded_opdata) {
     string ciphertext;
 
