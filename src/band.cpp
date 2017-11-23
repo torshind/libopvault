@@ -74,7 +74,7 @@ void Band::read() {
 }
 
 void Band::create_table() {
-    Vault::sql_exec(SQL_CREATE_ITEMS);
+    sql_exec(SQL_CREATE_ITEMS);
 }
 
 void Band::insert_entry(BandEntry &item) {
@@ -109,7 +109,7 @@ void Band::insert_entry(BandEntry &item) {
 
     DBGVAR(item.uuid);
 
-    Vault::sql_exec(buf);
+    sql_exec(buf);
     free(buf);
 }
 

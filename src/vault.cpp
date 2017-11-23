@@ -61,34 +61,6 @@ Vault::Vault(const string &cloud_data_dir, const string &local_data_dir, const s
     profile.get_master_key();
 }
 
-void Vault::sql_exec(const char sql[]) {
-    sqlite3 *db;
-    char *zErrMsg = nullptr;
-    int rc;
-
-    rc = sqlite3_open(DBFILE, &db);
-
-    if(rc){
-        ostringstream os;
-        os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
-        sqlite3_close(db);
-        throw std::runtime_error(os.str());
-    }
-
-    rc = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
-
-    if(rc != SQLITE_OK){
-        ostringstream os;
-        os << "libopvault: SQL error: " << zErrMsg << " - error code: " << rc;
-        sqlite3_free(zErrMsg);
-        sqlite3_close(db);
-        throw std::runtime_error(os.str());
-    }
-
-    sqlite3_free(zErrMsg);
-    sqlite3_close(db);
-}
-
 void Vault::get_profile() {
     sqlite3 *db;
     int rc;
@@ -135,7 +107,7 @@ void Vault::get_profile() {
     sqlite3_close(db);
 }
 
-void Vault::get_folders(vector<FolderEntry> &folders) {
+void Vault::get_folders(vector<FolderEntry> &folders) const {
     sqlite3 *db;
     int rc;
 
@@ -185,7 +157,7 @@ void Vault::set_folders(const vector<FolderEntry> &folders) {
     folder.insert_all_entries(folders);
 }
 
-void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) {
+void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) const {
     sqlite3 *db;
     int rc;
 
@@ -267,7 +239,7 @@ void Vault::create_db(const string &cloud_data_dir) {
     band.insert_all_entries();
 }
 
-void Vault::get_items(vector<BandEntry> &items) {
+void Vault::get_items(vector<BandEntry> &items) const {
     get_items_query(SQL_SELECT_ITEMS, items);
 }
 
@@ -276,7 +248,7 @@ void Vault::set_items(const vector<BandEntry> &items) {
     band.insert_all_entries(items);
 }
 
-void Vault::get_items_folder(string folder, std::vector<BandEntry> &items) {
+void Vault::get_items_folder(string folder, std::vector<BandEntry> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_FOLDER, folder.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
@@ -286,7 +258,7 @@ void Vault::get_items_folder(string folder, std::vector<BandEntry> &items) {
     free(buf);
 }
 
-void Vault::get_items_category(string category, std::vector<BandEntry> &items) {
+void Vault::get_items_category(string category, std::vector<BandEntry> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_CATEGORY, category.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);

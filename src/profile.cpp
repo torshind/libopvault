@@ -63,7 +63,7 @@ int Profile::read_updatedAt() {
 }
 
 void Profile::create_table() {
-    Vault::sql_exec(SQL_CREATE_PROFILE);
+    sql_exec(SQL_CREATE_PROFILE);
 }
 
 void Profile::insert_entry() {
@@ -94,7 +94,7 @@ void Profile::insert_entry() {
 
     DBGVAR(profile.uuid);
 
-    Vault::sql_exec(buf);
+    sql_exec(buf);
     free(buf);
 }
 

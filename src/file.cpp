@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cryptopp/base64.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
+#include <sqlite3.h>
 
 #include "dbg.h"
 #include "json.hpp"
@@ -82,6 +83,35 @@ void File::read(const std::string &filename) {
 #endif
 
     return;
+}
+
+void File::sql_exec(const char sql[]) {
+    sqlite3 *db;
+    char *zErrMsg = nullptr;
+    int rc;
+
+    rc = sqlite3_open(DBFILE, &db);
+
+    if(rc){
+        ostringstream os;
+        os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    rc = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
+
+    if(rc != SQLITE_OK){
+        ostringstream os;
+        os << "libopvault: SQL error: " << zErrMsg << " - error code: " << rc;
+        sqlite3_free(zErrMsg);
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    sqlite3_free(zErrMsg);
+    sqlite3_close(db);
+
 }
 
 }

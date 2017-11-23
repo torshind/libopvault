@@ -53,7 +53,7 @@ void Folder::read() {
 }
 
 void Folder::create_table() {
-    Vault::sql_exec(SQL_CREATE_FOLDERS);
+    sql_exec(SQL_CREATE_FOLDERS);
 }
 
 void Folder::insert_entry(FolderEntry &folder) {
@@ -74,7 +74,7 @@ void Folder::insert_entry(FolderEntry &folder) {
 
     DBGVAR(folder.uuid);
 
-    Vault::sql_exec(buf);
+    sql_exec(buf);
     free(buf);
 }
 

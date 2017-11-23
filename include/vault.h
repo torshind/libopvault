@@ -43,17 +43,16 @@ private:
     ProfileEntry profile;
 
     void get_profile();
-    void get_items_query(const char query[], std::vector<BandEntry> &items);
+    void get_items_query(const char query[], std::vector<BandEntry> &items) const;
     void create_db(const std::string &cloud_data_dir);
 
 public:
-    void get_folders(std::vector<FolderEntry> &folders);
+    void get_folders(std::vector<FolderEntry> &folders) const;
     void set_folders(const std::vector<FolderEntry> &folders);
-    void get_items(std::vector<BandEntry> &items);
+    void get_items(std::vector<BandEntry> &items) const;
     void set_items(const std::vector<BandEntry> &items);
-    void get_items_folder(std::string folder, std::vector<BandEntry> &items);
-    void get_items_category(std::string category, std::vector<BandEntry> &items);
-    static void sql_exec(const char sql[]);
+    void get_items_folder(std::string folder, std::vector<BandEntry> &items) const;
+    void get_items_category(std::string category, std::vector<BandEntry> &items) const;
 };
 
 }

@@ -34,17 +34,28 @@ SOFTWARE.
 using namespace std;
 using namespace OPVault;
 
-int main(int argc, char *argv[])
-{
-    string master_password = u8"freddy";
-    string cloud_data_dir = "./onepassword_data/default";
-    string local_data_dir = "./";
+static void get_items(const Vault &vault) {
+    vector<BandEntry> items;
 
-    // OPEN VAULT
-    Vault vault(cloud_data_dir, local_data_dir, master_password);
+    vault.get_items(items);
+    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+        cout << "Item " << it->get_uuid() << endl;
+        string str;
+        it->decrypt_overview(str);
+        cout << "Overview: " << str << endl;
+        it->decrypt_data(str);
+        cout << "Data: " << str << endl;
+        cout << "Category: " << it->get_category() << endl;
+        cout << "Fave: " << it->get_fave() << endl;
+        cout << "Folder: " << it->get_folder() << endl;
+        cout << "Trashed: " << it->get_trashed() << endl;
+    }
 
-    // GET FOLDER CONTENTS
+}
+
+static void get_folders(const Vault &vault) {
     vector<FolderEntry> folders;
+
     vault.get_folders(folders);
     for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
         cout << "Folder " << it->get_uuid() << endl;
@@ -52,10 +63,14 @@ int main(int argc, char *argv[])
         it->decrypt_overview(str);
         cout << "Overview: " << str << endl;
     }
+}
 
+static void get_items_folder(const Vault &vault) {
+    vector<FolderEntry> folders;
     vector<BandEntry> items;
 
-    // GET ITEMS BY FOLDER
+    vault.get_folders(folders);
+
     for(vector<FolderEntry>::iterator it1=folders.begin(); it1!=folders.end(); ++it1) {
         cout << "Folder " << it1->get_uuid() << endl;
         items.clear();
@@ -70,7 +85,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    // GET ITEMS BY CATEGORY
+}
+
+static void get_items_category(const Vault &vault) {
+    vector<BandEntry> items;
+
     for(unordered_map<string,string>::const_iterator it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
         cout << "Category " << it1->second << endl;
         items.clear();
@@ -85,17 +104,32 @@ int main(int argc, char *argv[])
         }
     }
 
+}
+
+int main(int argc, char *argv[])
+{
+    string master_password = u8"freddy";
+    string cloud_data_dir = "./onepassword_data/default";
+    string local_data_dir = "./";
+
+    // OPEN VAULT
+    Vault vault(cloud_data_dir, local_data_dir, master_password);
+
+    // GET FOLDER CONTENTS
+    get_folders(vault);
+
+
+    // GET ITEMS BY FOLDER
+    get_items_folder(vault);
+
+    // GET ITEMS BY CATEGORY
+    get_items_category(vault);
+
     // GET ALL ITEMS
-    items.clear();
-    vault.get_items(items);
-    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
-        cout << "Item " << it->get_uuid() << endl;
-        string str;
-        it->decrypt_overview(str);
-        cout << "Overview: " << str << endl;
-        it->decrypt_data(str);
-        cout << "Data: " << str << endl;
-    }
+    get_items(vault);
+
+    vector<FolderEntry> folders;
+    vector<BandEntry> items;
 
     // INSERT NEW ITEM
     items.clear();
@@ -131,28 +165,8 @@ int main(int argc, char *argv[])
     vault.set_folders(folders);
 
     // CHECK NEW DATA
-    folders.clear();
-    vault.get_folders(folders);
-    for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
-        cout << "Folder " << it->get_uuid() << endl;
-        string str;
-        it->decrypt_overview(str);
-        cout << "Overview: " << str << endl;
-    }
-    items.clear();
-    vault.get_items(items);
-    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
-        cout << "Item " << it->get_uuid() << endl;
-        string str;
-        it->decrypt_overview(str);
-        cout << "Overview: " << str << endl;
-        it->decrypt_data(str);
-        cout << "Data: " << str << endl;
-        cout << "Category: " << it->get_category() << endl;
-        cout << "Fave: " << it->get_fave() << endl;
-        cout << "Folder: " << it->get_folder() << endl;
-        cout << "Trashed: " << it->get_trashed() << endl;
-    }
+    get_folders(vault);
+    get_items(vault);
 
     // RESET LOCAL DB
     remove("./opvault.db");

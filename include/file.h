@@ -35,15 +35,15 @@ namespace OPVault {
 
 class File
 {
-public:
+protected:
     File() {}
 
-protected:
     static std::string directory;
 
     nlohmann::json data;
 
     void read(const std::string &filename);
+    void sql_exec(const char sql[]);
 
 public:
     void set_directory(const std::string &d) { directory = d; }
