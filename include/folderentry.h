@@ -36,6 +36,7 @@ class FolderEntry : public UserEntry {
 public:
     FolderEntry() {}
 
+private:
     FolderEntry(long _created,
                 std::string _o,
                 long _tx,

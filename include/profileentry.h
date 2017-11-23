@@ -38,6 +38,11 @@ class ProfileEntry : public BaseEntry
 public:
     ProfileEntry() {}
 
+    void derive_keys(const std::string &master_password);
+    void get_master_key();
+    void get_overview_key();
+
+private:
     ProfileEntry(std::string _lastUpdatedBy,
                  long _updatedAt,
                  std::string _profileName,
@@ -60,11 +65,6 @@ public:
         createdAt(_createdAt)
     {}
 
-    void derive_keys(const std::string &master_password);
-    void get_master_key();
-    void get_overview_key();
-
-private:
     std::string lastUpdatedBy;
     long updatedAt;
     std::string profileName;
