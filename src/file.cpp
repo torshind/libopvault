@@ -77,7 +77,7 @@ void File::read(const std::string &filename) {
     }
 
 #ifndef NDEBUG
-    for (json::iterator it = data.begin(); it != data.end(); ++it) {
+    for (auto it = data.begin(); it != data.end(); ++it) {
         DBGMSG(it.key() << " : " << it.value());
     }
 #endif

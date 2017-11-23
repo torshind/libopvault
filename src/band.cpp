@@ -49,7 +49,7 @@ void Band::read() {
             }
             continue;
         }
-        for(json::iterator it=data.begin(); it!=data.end(); ++it) {
+        for(auto it=data.begin(); it!=data.end(); ++it) {
             BandEntry item;
             try {
                 item = BandEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
@@ -114,13 +114,13 @@ void Band::insert_entry(BandEntry &item) {
 }
 
 void Band::insert_all_entries() {
-    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+    for(auto it=items.begin(); it!=items.end(); ++it) {
         insert_entry(*it);
     }
 }
 
 void Band::insert_all_entries(std::vector<BandEntry> items) {
-    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+    for(auto it=items.begin(); it!=items.end(); ++it) {
         if (it->updateState) {
             it->generate_hmac();
             insert_entry(*it);

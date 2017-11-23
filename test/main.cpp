@@ -38,7 +38,7 @@ static void get_items(const Vault &vault) {
     vector<BandEntry> items;
 
     vault.get_items(items);
-    for(vector<BandEntry>::iterator it=items.begin(); it!=items.end(); ++it) {
+    for(auto it=items.begin(); it!=items.end(); ++it) {
         cout << "Item " << it->get_uuid() << endl;
         string str;
         it->decrypt_overview(str);
@@ -57,7 +57,7 @@ static void get_folders(const Vault &vault) {
     vector<FolderEntry> folders;
 
     vault.get_folders(folders);
-    for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
+    for(auto it=folders.begin(); it!=folders.end(); ++it) {
         cout << "Folder " << it->get_uuid() << endl;
         string str;
         it->decrypt_overview(str);
@@ -71,11 +71,11 @@ static void get_items_folder(const Vault &vault) {
 
     vault.get_folders(folders);
 
-    for(vector<FolderEntry>::iterator it1=folders.begin(); it1!=folders.end(); ++it1) {
+    for(auto it1=folders.begin(); it1!=folders.end(); ++it1) {
         cout << "Folder " << it1->get_uuid() << endl;
         items.clear();
         vault.get_items_folder(it1->get_uuid(), items);
-        for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
+        for(auto it2=items.begin(); it2!=items.end(); ++it2) {
             cout << "Item " << it2->get_uuid() << endl;
             string str;
             it2->decrypt_overview(str);
@@ -90,11 +90,11 @@ static void get_items_folder(const Vault &vault) {
 static void get_items_category(const Vault &vault) {
     vector<BandEntry> items;
 
-    for(unordered_map<string,string>::const_iterator it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
+    for(auto it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
         cout << "Category " << it1->second << endl;
         items.clear();
         vault.get_items_category(it1->first, items);
-        for(vector<BandEntry>::iterator it2=items.begin(); it2!=items.end(); ++it2) {
+        for(auto it2=items.begin(); it2!=items.end(); ++it2) {
             cout << "Item " << it2->get_uuid() << endl;
             string str;
             it2->decrypt_overview(str);

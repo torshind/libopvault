@@ -42,7 +42,7 @@ void Folder::read() {
         throw;
     }
 
-    for(json::iterator it = data.begin(); it !=data.end(); ++it) {
+    for(auto it = data.begin(); it !=data.end(); ++it) {
         FolderEntry folder = FolderEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
                                           (*it)["overview"].is_string() ? (*it)["overview"].get<string>() : "NULL",
                                           (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
@@ -79,13 +79,13 @@ void Folder::insert_entry(FolderEntry &folder) {
 }
 
 void Folder::insert_all_entries() {
-    for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
+    for(auto it=folders.begin(); it!=folders.end(); ++it) {
         insert_entry(*it);
     }
 }
 
 void Folder::insert_all_entries(std::vector<FolderEntry> folders) {
-    for(vector<FolderEntry>::iterator it=folders.begin(); it!=folders.end(); ++it) {
+    for(auto it=folders.begin(); it!=folders.end(); ++it) {
         if (it->updateState) {
             insert_entry(*it);
         }
