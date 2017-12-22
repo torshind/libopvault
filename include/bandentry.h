@@ -44,9 +44,9 @@ public:
         updateState = false;
     }
 
-    std::string get_category() { return category; }
+    std::string& get_category() { return category; }
     unsigned long get_fave() { return fave; }
-    std::string get_folder() { return folder; }
+    std::string& get_folder() { return folder; }
     int get_trashed() { return trashed; }
 
     void set_category(const std::string &_category);
