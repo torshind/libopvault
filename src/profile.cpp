@@ -28,7 +28,6 @@ SOFTWARE.
 
 #include "profile.h"
 
-using namespace std;
 using json = nlohmann::json;
 
 namespace OPVault {
@@ -40,15 +39,15 @@ void Profile::read() {
     catch (...) {
         throw;
     }
-    profile = ProfileEntry( data["lastUpdatedBy"].is_string() ? data["lastUpdatedBy"].get<string>() : "NULL",
+    profile = ProfileEntry( data["lastUpdatedBy"].is_string() ? data["lastUpdatedBy"].get<std::string>() : "NULL",
                             data["updatedAt"].is_number_integer() ? data["updatedAt"].get<long>() : -1,
-                            data["profileName"].is_string() ? data["profileName"].get<string>() : "NULL",
-                            data["salt"].is_string() ? data["salt"].get<string>() : "NULL",
-                            data["passwordHint"].is_string() ? data["passwordHint"].get<string>() : "NULL",
-                            data["masterKey"].is_string() ? data["masterKey"].get<string>() : "NULL",
+                            data["profileName"].is_string() ? data["profileName"].get<std::string>() : "NULL",
+                            data["salt"].is_string() ? data["salt"].get<std::string>() : "NULL",
+                            data["passwordHint"].is_string() ? data["passwordHint"].get<std::string>() : "NULL",
+                            data["masterKey"].is_string() ? data["masterKey"].get<std::string>() : "NULL",
                             data["iterations"].is_number_integer() ? data["iterations"].get<unsigned int>() : 0,
-                            data["uuid"].is_string() ? data["uuid"].get<string>() : "NULL",
-                            data["overviewKey"].is_string() ? data["overviewKey"].get<string>() : "NULL",
+                            data["uuid"].is_string() ? data["uuid"].get<std::string>() : "NULL",
+                            data["overviewKey"].is_string() ? data["overviewKey"].get<std::string>() : "NULL",
                             data["createdAt"].is_number_integer() ? data["createdAt"].get<long>() : -1 );
 }
 

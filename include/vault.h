@@ -48,11 +48,12 @@ private:
 
 public:
     void get_folders(std::vector<FolderEntry> &folders) const;
-    void set_folders(const std::vector<FolderEntry> &folders);
+    void set_folders(std::vector<FolderEntry> &folders);
     void get_items(std::vector<BandEntry> &items) const;
-    void set_items(const std::vector<BandEntry> &items);
+    void set_items(std::vector<BandEntry> &items);
     void get_items_folder(std::string folder, std::vector<BandEntry> &items) const;
     void get_items_category(std::string category, std::vector<BandEntry> &items) const;
+    void sync(const std::string &cloud_data_dir);
 };
 
 }

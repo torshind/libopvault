@@ -33,7 +33,9 @@ namespace OPVault {
 
 class Folder : public File
 {
-public:
+  friend class Vault;
+
+protected:
     Folder() {}
 
 private:
@@ -44,7 +46,7 @@ public:
     void create_table();
     void insert_entry(FolderEntry &folder);
     void insert_all_entries();
-    void insert_all_entries(std::vector<FolderEntry> folders);
+    void insert_all_entries(std::vector<FolderEntry> &folders);
 };
 
 }

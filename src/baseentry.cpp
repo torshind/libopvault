@@ -35,7 +35,6 @@ SOFTWARE.
 
 #include "baseentry.h"
 
-using namespace std;
 using namespace CryptoPP;
 
 namespace OPVault {
@@ -44,8 +43,8 @@ SecByteBlock BaseEntry::derived_key(KEY_LENGTH);
 SecByteBlock BaseEntry::master_key(KEY_LENGTH);
 SecByteBlock BaseEntry::overview_key(KEY_LENGTH);
 
-void BaseEntry::verify_opdata(const string &encoded_opdata, const SecByteBlock &key) {
-    string opdata;
+void BaseEntry::verify_opdata(const std::string &encoded_opdata, const SecByteBlock &key) {
+    std::string opdata;
     StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));
 
     HMAC<SHA256> hmac(key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
@@ -62,7 +61,7 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const SecByteB
         throw std::invalid_argument("libopvault: failed hash check");
     }
 
-    string opdata;
+    std::string opdata;
     StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));
 
     DBGVAR(opdata);
@@ -82,7 +81,7 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const SecByteB
 
     SecByteBlock iv(reinterpret_cast<const unsigned char *> (opdata.data())+START_IV, AES::BLOCKSIZE);
 
-    string ciphertext = string(opdata.data()+START_CIPHER, ciphertext_length);
+    std::string ciphertext = std::string(opdata.data()+START_CIPHER, ciphertext_length);
 
     CBC_Mode<AES>::Decryption decryption(key, ENC_KEY_LENGTH, iv);
 
@@ -97,7 +96,7 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const SecByteB
 }
 
 void BaseEntry::encrypt_opdata(const std::string &plaintext, const SecByteBlock &iv, const SecByteBlock &key, std::string &encoded_opdata) {
-    string ciphertext;
+    std::string ciphertext;
 
     // Padding
     unsigned int padding_length = (BLOCK_LENGTH - plaintext.size() % BLOCK_LENGTH);
@@ -109,7 +108,7 @@ void BaseEntry::encrypt_opdata(const std::string &plaintext, const SecByteBlock 
     // Encryption
     CBC_Mode<AES>::Encryption encryption(key, ENC_KEY_LENGTH, iv);
 
-    string paddedtext = string(reinterpret_cast<const char *> (padding), padding_length) + plaintext;
+    std::string paddedtext = std::string(reinterpret_cast<const char *> (padding), padding_length) + plaintext;
     StringSource(paddedtext, true, new StreamTransformationFilter(encryption, new StringSink(ciphertext), StreamTransformationFilter::NO_PADDING));
 
     // opdata
@@ -117,10 +116,10 @@ void BaseEntry::encrypt_opdata(const std::string &plaintext, const SecByteBlock 
     size_t plaintext_length = plaintext.size();
     memcpy(plaintext_length_str, &plaintext_length, LENGTH_LENGTH);
 
-    string opdata = string("opdata01") + string(plaintext_length_str, LENGTH_LENGTH) + string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + ciphertext;
+    std::string opdata = std::string("opdata01") + std::string(plaintext_length_str, LENGTH_LENGTH) + std::string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + ciphertext;
 
     // HMAC
-    string mac;
+    std::string mac;
 
     HMAC<SHA256> hmac(key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 

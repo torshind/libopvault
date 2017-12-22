@@ -49,10 +49,10 @@ public:
     std::string get_folder() { return folder; }
     int get_trashed() { return trashed; }
 
-    void set_category(const std::string _category);
-    void set_data(const std::string _d);
+    void set_category(const std::string &_category);
+    void set_data(const std::string &_d);
     void set_fave(const unsigned long _fave);
-    void set_folder(const std::string _folder);
+    void set_folder(const std::string &_folder);
     void set_trashed(const int _trashed);
 
     void decrypt_data(std::string& data);

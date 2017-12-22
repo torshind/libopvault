@@ -36,7 +36,6 @@ SOFTWARE.
 
 #include "bandentry.h"
 
-using namespace std;
 using namespace CryptoPP;
 
 namespace OPVault {
@@ -46,12 +45,12 @@ void BandEntry::verify_key() {
 }
 
 void BandEntry::decrypt_key(SecByteBlock &key) {
-    string encrypted_key;
+    std::string encrypted_key;
     StringSource(k, true, new Base64Decoder(new StringSink(encrypted_key)));
 
     SecByteBlock iv(reinterpret_cast<const unsigned char *> (encrypted_key.data()), AES::BLOCKSIZE);
 
-    string ciphertext = string(encrypted_key.data()+AES::BLOCKSIZE, ITEM_KEY_LENGTH);
+    std::string ciphertext = std::string(encrypted_key.data()+AES::BLOCKSIZE, ITEM_KEY_LENGTH);
 
     CBC_Mode<AES>::Decryption decryption(master_key, ENC_KEY_LENGTH, iv);
 
@@ -71,23 +70,23 @@ void BandEntry::decrypt_data(std::string& data) {
 }
 
 std::string BandEntry::hmac_in_str() {
-    return string(
+    return std::string(
                 "category" + category +
-                "created" + to_string(created) +
+                "created" + std::to_string(created) +
                 "d" + d +
-                (fave == 0 ? "" : "fave" + to_string(fave)) +
+                (fave == 0 ? "" : "fave" + std::to_string(fave)) +
                 (folder == "NULL" ? "" : "folder" + folder) +
                 "k" + k +
                 "o" + o +
-                (trashed == -1 ? "" : "trashed" + to_string(trashed)) +
-                "tx" + to_string(tx) +
-                "updated" + to_string(updated) +
+                (trashed == -1 ? "" : "trashed" + std::to_string(trashed)) +
+                "tx" + std::to_string(tx) +
+                "updated" + std::to_string(updated) +
                 "uuid" + uuid
                 );
 }
 
 void BandEntry::verify() {
-    string input;
+    std::string input;
     StringSource(hmac, true, new Base64Decoder(new StringSink(input)));
 
     HMAC<SHA256> _hmac(overview_key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
@@ -104,7 +103,7 @@ void BandEntry::init() {
 
     // Generate key
     AutoSeededRandomPool prng;
-    string encrypted_key;
+    std::string encrypted_key;
 
     SecByteBlock plain_key(ITEM_KEY_LENGTH);
     prng.GenerateBlock(plain_key, plain_key.size());
@@ -118,17 +117,17 @@ void BandEntry::init() {
     ArraySource(plain_key.data(), plain_key.size(), true, new StreamTransformationFilter(encryption, new StringSink(encrypted_key), StreamTransformationFilter::NO_PADDING));
 
     // HMAC
-    string mac;
+    std::string mac;
 
     HMAC<SHA256> _hmac(master_key+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 
-    StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key, true, new HashFilter(_hmac, new StringSink(mac)));
+    StringSource(std::string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key, true, new HashFilter(_hmac, new StringSink(mac)));
 
     // Base64 encoding
-    StringSource(string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
+    StringSource(std::string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
 }
 
-void BandEntry::set_category(const string _category) {
+void BandEntry::set_category(const std::string &_category) {
     category = _category;
     updateState = true;
     if (uuid.empty()) {
@@ -136,7 +135,7 @@ void BandEntry::set_category(const string _category) {
     }
 }
 
-void BandEntry::set_data(const string _d) {
+void BandEntry::set_data(const std::string &_d) {
     updated = time(nullptr);
     updateState = true;
     if (uuid.empty()) {
@@ -168,7 +167,7 @@ void BandEntry::set_fave(const unsigned long _fave) {
     }
 }
 
-void BandEntry::set_folder(const string _folder) {
+void BandEntry::set_folder(const std::string &_folder) {
     folder = _folder;
     updateState = true;
     if (uuid.empty()) {
@@ -186,14 +185,17 @@ void BandEntry::set_trashed(const int _trashed) {
 
 void BandEntry::generate_hmac() {
     // HMAC
-    string mac;
-    string input = hmac_in_str();
+    std::string mac;
+    std::string input = hmac_in_str();
 
     HMAC<SHA256> _hmac(overview_key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 
     StringSource(input, true, new HashFilter(_hmac, new StringSink(mac)));
 
     // Base64 encoding
+    if (!hmac.empty()) {
+        hmac.clear();
+    }
     StringSource(mac, true, new Base64Encoder(new StringSink(hmac)));
 }
 

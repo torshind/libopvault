@@ -29,7 +29,6 @@ SOFTWARE.
 
 #include "userentry.h"
 
-using namespace std;
 using namespace CryptoPP;
 
 namespace OPVault {
@@ -49,11 +48,11 @@ void UserEntry::init() {
 
     uuid_generate(uuid_bin);
     uuid_unparse_upper(uuid_bin, uuid_str);
-    uuid = string(uuid_str);
+    uuid = std::string(uuid_str);
     uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
 }
 
-void UserEntry::set_overview(const std::string _o) {
+void UserEntry::set_overview(const std::string &_o) {
     updated = time(nullptr);
     updateState = true;
     if (uuid.empty()) {
