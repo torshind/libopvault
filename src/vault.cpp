@@ -246,7 +246,7 @@ void Vault::set_items(std::vector<BandEntry> &items) {
     band.insert_all_entries(items);
 }
 
-void Vault::get_items_folder(std::string folder, std::vector<BandEntry> &items) const {
+void Vault::get_items_folder(const std::string &folder, std::vector<BandEntry> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_FOLDER, folder.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
@@ -256,7 +256,7 @@ void Vault::get_items_folder(std::string folder, std::vector<BandEntry> &items) 
     free(buf);
 }
 
-void Vault::get_items_category(std::string category, std::vector<BandEntry> &items) const {
+void Vault::get_items_category(const std::string &category, std::vector<BandEntry> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_CATEGORY, category.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);

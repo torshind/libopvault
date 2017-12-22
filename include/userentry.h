@@ -28,8 +28,8 @@ protected:
     virtual ~UserEntry() {}
 
 public:
-    std::string get_overview() { return o; }
-    std::string get_uuid() { return uuid; }
+    std::string& get_overview() { return o; }
+    std::string& get_uuid() { return uuid; }
 
     void set_overview(const std::string &_o);
 
