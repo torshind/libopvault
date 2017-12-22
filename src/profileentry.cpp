@@ -32,13 +32,12 @@ SOFTWARE.
 #include "const.h"
 #include "profileentry.h"
 
-using namespace std;
 using namespace CryptoPP;
 
 namespace OPVault {
 
 void ProfileEntry::derive_keys(const std::string &master_password) {
-    string salt;
+    std::string salt;
     StringSource(this->salt, true, new Base64Decoder(new StringSink(salt)));
 
     PKCS5_PBKDF2_HMAC<SHA512> pbkdf2;
@@ -56,7 +55,7 @@ void ProfileEntry::derive_keys(const std::string &master_password) {
 }
 
 void ProfileEntry::get_profile_key(const std::string &encoded_key_opdata, SecByteBlock &profile_key) {
-    string opdata_key;
+    std::string opdata_key;
     decrypt_opdata(encoded_key_opdata, derived_key, opdata_key);
 
     SHA512().CalculateDigest(profile_key, reinterpret_cast<const unsigned char *> (opdata_key.data()), opdata_key.length());

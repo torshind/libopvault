@@ -112,86 +112,93 @@ int main(int argc, char *argv[])
     string cloud_data_dir = "./onepassword_data/default";
     string local_data_dir = "./";
 
-    // OPEN VAULT
-    Vault vault(cloud_data_dir, local_data_dir, master_password);
+    {
+        // OPEN VAULT
+        Vault vault(cloud_data_dir, local_data_dir, master_password);
 
-    // GET FOLDER CONTENTS
-    get_folders(vault);
+        // GET FOLDER CONTENTS
+        get_folders(vault);
 
 
-    // GET ITEMS BY FOLDER
-    get_items_folder(vault);
+        // GET ITEMS BY FOLDER
+        get_items_folder(vault);
 
-    // GET ITEMS BY CATEGORY
-    get_items_category(vault);
+        // GET ITEMS BY CATEGORY
+        get_items_category(vault);
 
-    // GET ALL ITEMS
-    get_items(vault);
+        // GET ALL ITEMS
+        get_items(vault);
+    }
 
-    vector<FolderEntry> folders;
-    vector<BandEntry> items;
+    {
+        // OPEN VAULT
+        Vault vault(cloud_data_dir, local_data_dir, master_password);
 
-    // INSERT NEW ITEMS
-    items.clear();
-    BandEntry item1;
-    item1.set_category("001");
-    items.push_back(item1);
-    BandEntry item2;
-    item2.set_data("{DATA2}");
-    items.push_back(item2);
-    BandEntry item3;
-    item3.set_folder("FOLDER3");
-    items.push_back(item3);
-    BandEntry item4;
-    item4.set_overview("{OVERVIEW4}");
-    items.push_back(item4);
-    BandEntry item5;
-    item5.set_fave(5000);
-    items.push_back(item5);
-    BandEntry item6;
-    item6.set_trashed(1);
-    items.push_back(item6);
-    BandEntry item7;
-    item7.set_category("099");
-    item7.set_data("{DATA7}");
-    item7.set_overview("{OVERVIEW7}");
-    items.push_back(item7);
-    vault.set_items(items);
+        vector<FolderEntry> folders;
+        vector<BandEntry> items;
 
-    // INSERT NEW FOLDER
-    FolderEntry folder;
-    folder.set_overview("{\"title\":\"Mordor\"}");
-    folders.push_back(folder);
-    vault.set_folders(folders);
+        // INSERT NEW ITEMS
+        items.clear();
+        BandEntry item1;
+        item1.set_category("001");
+        items.push_back(item1);
+        BandEntry item2;
+        item2.set_data("{DATA2}");
+        items.push_back(item2);
+        BandEntry item3;
+        item3.set_folder("FOLDER3");
+        items.push_back(item3);
+        BandEntry item4;
+        item4.set_overview("{OVERVIEW4}");
+        items.push_back(item4);
+        BandEntry item5;
+        item5.set_fave(5000);
+        items.push_back(item5);
+        BandEntry item6;
+        item6.set_trashed(1);
+        items.push_back(item6);
+        BandEntry item7;
+        item7.set_category("099");
+        item7.set_data("{DATA7}");
+        item7.set_overview("{OVERVIEW7}");
+        items.push_back(item7);
+        vault.set_items(items);
 
-    // CHECK NEW DATA
-    get_folders(vault);
-    get_items(vault);
+        // INSERT NEW FOLDER
+        FolderEntry folder;
+        folder.set_overview("{\"title\":\"Mordor\"}");
+        folders.push_back(folder);
+        vault.set_folders(folders);
 
-    // MODIFY ITEMS
-    items[0].set_data("{DATA1.1}");
-    items[1].set_category("002");
-    items[1].set_data("{DATA2.2}");
-    items[2].set_overview("{OVERVIEW3.3}");
-    items[3].set_data("{DATA4.4}");
-    items[3].set_fave(4000);
-    items[3].set_overview("{OVERVIEW4.4}");
-    items[4].set_trashed(1);
-    items[5].set_category("005");
-    items[5].set_data("{DATA6.6}");
-    items[5].set_fave(6000);
-    items[5].set_folder("FOLDER6");
-    items[5].set_overview("{OVERVIEW6.6}");
-    items[5].set_trashed(0);
-    items[6].set_category("111");
-    items[6].set_data("{DATA7.7}");
-    items[6].set_overview("{OVERVIEW7.7}");
+        // CHECK NEW DATA
+        get_folders(vault);
+        get_items(vault);
 
-    vault.set_items(items);
+        // MODIFY ITEMS
+        items[0].set_data("{DATA1.1}");
+        items[1].set_category("002");
+        items[1].set_data("{DATA2.2}");
+        items[2].set_overview("{OVERVIEW3.3}");
+        items[3].set_data("{DATA4.4}");
+        items[3].set_fave(4000);
+        items[3].set_overview("{OVERVIEW4.4}");
+        items[4].set_trashed(1);
+        items[5].set_category("005");
+        items[5].set_data("{DATA6.6}");
+        items[5].set_fave(6000);
+        items[5].set_folder("FOLDER6");
+        items[5].set_overview("{OVERVIEW6.6}");
+        items[5].set_trashed(0);
+        items[6].set_category("111");
+        items[6].set_data("{DATA7.7}");
+        items[6].set_overview("{OVERVIEW7.7}");
 
-    // CHECK MODIFIED DATA
-    get_folders(vault);
-    get_items(vault);
+        vault.set_items(items);
+
+        // CHECK MODIFIED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
 
     // RESET LOCAL DB
     remove("./opvault.db");

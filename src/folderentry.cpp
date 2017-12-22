@@ -25,8 +25,6 @@ SOFTWARE.
 
 #include "folderentry.h"
 
-using namespace std;
-
 namespace OPVault {
 
 }

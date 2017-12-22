@@ -29,7 +29,6 @@ SOFTWARE.
 
 #include "folder.h"
 
-using namespace std;
 using json = nlohmann::json;
 
 namespace OPVault {
@@ -44,10 +43,10 @@ void Folder::read() {
 
     for(auto it = data.begin(); it !=data.end(); ++it) {
         FolderEntry folder = FolderEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
-                                          (*it)["overview"].is_string() ? (*it)["overview"].get<string>() : "NULL",
+                                          (*it)["overview"].is_string() ? (*it)["overview"].get<std::string>() : "NULL",
                                           (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
                                           (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
-                                          (*it)["uuid"].is_string() ? (*it)["uuid"].get<string>() : "NULL" );
+                                          (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL" );
         folders.push_back(folder);
     }
 }
@@ -84,10 +83,11 @@ void Folder::insert_all_entries() {
     }
 }
 
-void Folder::insert_all_entries(std::vector<FolderEntry> folders) {
+void Folder::insert_all_entries(std::vector<FolderEntry> &folders) {
     for(auto it=folders.begin(); it!=folders.end(); ++it) {
         if (it->updateState) {
             insert_entry(*it);
+            it->updateState = false;
         }
     }
 }

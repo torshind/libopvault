@@ -30,7 +30,6 @@ SOFTWARE.
 
 #include "band.h"
 
-using namespace std;
 using json = nlohmann::json;
 
 namespace OPVault {
@@ -39,7 +38,7 @@ void Band::read() {
     int exept_count = 0;
     for (int index=0; index<BAND_NUM; ++index) {
         try {
-            File::read(string("band_") + BAND_INDEXES[index] + string(".js"));
+            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
         }
         catch (...) {
             exept_count++;
@@ -53,16 +52,16 @@ void Band::read() {
             BandEntry item;
             try {
                 item = BandEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
-                                  (*it)["o"].is_string() ? (*it)["o"].get<string>() : "NULL",
+                                  (*it)["o"].is_string() ? (*it)["o"].get<std::string>() : "NULL",
                                   (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
                                   (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
-                                  (*it)["uuid"].is_string() ? (*it)["uuid"].get<string>() : "NULL",
-                                  (*it)["category"].is_string() ? (*it)["category"].get<string>() : "NULL",
-                                  (*it)["d"].is_string() ? (*it)["d"].get<string>() : "NULL",
+                                  (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL",
+                                  (*it)["category"].is_string() ? (*it)["category"].get<std::string>() : "NULL",
+                                  (*it)["d"].is_string() ? (*it)["d"].get<std::string>() : "NULL",
                                   (*it)["fave"].is_number_integer() ? (*it)["fave"].get<unsigned long>() : 0,
-                                  (*it)["folder"].is_string() ? (*it)["folder"].get<string>() : "NULL",
-                                  (*it)["hmac"].is_string() ? (*it)["hmac"].get<string>() : "NULL",
-                                  (*it)["k"].is_string() ? (*it)["k"].get<string>() : "NULL",
+                                  (*it)["folder"].is_string() ? (*it)["folder"].get<std::string>() : "NULL",
+                                  (*it)["hmac"].is_string() ? (*it)["hmac"].get<std::string>() : "NULL",
+                                  (*it)["k"].is_string() ? (*it)["k"].get<std::string>() : "NULL",
                                   (*it)["trashed"].is_boolean() ? (*it)["trashed"].get<int>() : -1 );
             }
             catch (...) {
@@ -119,13 +118,19 @@ void Band::insert_all_entries() {
     }
 }
 
-void Band::insert_all_entries(std::vector<BandEntry> items) {
+void Band::insert_all_entries(std::vector<BandEntry> &items) {
     for(auto it=items.begin(); it!=items.end(); ++it) {
         if (it->updateState) {
             it->generate_hmac();
             insert_entry(*it);
+            it->updateState = false;
         }
     }
+}
+
+void Band::sync() {
+    //local changes: local.updated > local.tx
+    //remote changes: remote.tx > local.tx
 }
 
 }

@@ -35,7 +35,6 @@ SOFTWARE.
 
 #include "file.h"
 
-using namespace std;
 using namespace CryptoPP;
 
 using json = nlohmann::json;
@@ -45,10 +44,10 @@ namespace OPVault {
 std::string File::directory;
 
 void File::read(const std::string &filename) {
-    ifstream ifs(directory + "/" + filename);
-    string file_string;
-    ostringstream oss;
-    string line;
+    std::ifstream ifs(directory + "/" + filename);
+    std::string file_string;
+    std::ostringstream oss;
+    std::string line;
 
     if (ifs.is_open()) {
         while(getline(ifs, line)) {
@@ -56,12 +55,12 @@ void File::read(const std::string &filename) {
         }
     }
     else {
-        throw std::runtime_error(string("libopvault: unable to read file ") + directory + "/" + filename);
+        throw std::runtime_error(std::string("libopvault: unable to read file ") + directory + "/" + filename);
     }
     file_string = oss.str();
 
     {
-        string::iterator it;
+        std::string::iterator it;
         for (it=file_string.begin(); *it!='{'; ++it);
         file_string.erase(file_string.begin(), it);
 
@@ -93,7 +92,7 @@ void File::sql_exec(const char sql[]) {
     rc = sqlite3_open(DBFILE, &db);
 
     if(rc){
-        ostringstream os;
+        std::ostringstream os;
         os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
         sqlite3_close(db);
         throw std::runtime_error(os.str());
@@ -102,7 +101,7 @@ void File::sql_exec(const char sql[]) {
     rc = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
 
     if(rc != SQLITE_OK){
-        ostringstream os;
+        std::ostringstream os;
         os << "libopvault: SQL error: " << zErrMsg << " - error code: " << rc;
         sqlite3_free(zErrMsg);
         sqlite3_close(db);
