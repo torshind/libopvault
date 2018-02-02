@@ -28,16 +28,16 @@ SOFTWARE.
 
 #include <vector>
 
-#include "userentry.h"
+#include "useritem.h"
 
 namespace OPVault {
 
-class BandEntry : public UserEntry {
+class BandItem : public UserItem {
     friend class Vault;
     friend class Band;
 
 public:
-    BandEntry() {
+    BandItem() {
         fave = 0;
         folder = "NULL";
         trashed = -1;
@@ -58,23 +58,23 @@ public:
     void decrypt_data(std::string& data);
 
 private:
-    BandEntry(long _created,
-              std::string _o,
-              long _tx,
-              long _updated,
-              std::string _uuid,
-              std::string _category,
-              std::string _d,
-              unsigned long _fave,
-              std::string _folder,
-              std::string _hmac,
-              std::string _k,
-              int _trashed) :
-        UserEntry(_created,
-                  _o,
-                  _tx,
-                  _updated,
-                  _uuid),
+    BandItem(long _created,
+             std::string _o,
+             long _tx,
+             long _updated,
+             std::string _uuid,
+             std::string _category,
+             std::string _d,
+             unsigned long _fave,
+             std::string _folder,
+             std::string _hmac,
+             std::string _k,
+             int _trashed) :
+        UserItem(_created,
+                 _o,
+                 _tx,
+                 _updated,
+                 _uuid),
         category(_category),
         d(_d),
         fave(_fave),

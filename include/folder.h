@@ -27,7 +27,7 @@ SOFTWARE.
 #define FOLDERS_H
 
 #include "file.h"
-#include "folderentry.h"
+#include "folderitem.h"
 
 namespace OPVault {
 
@@ -39,14 +39,14 @@ protected:
     Folder() {}
 
 private:
-    std::vector<FolderEntry> folders;
+    std::vector<FolderItem> folders;
 
 public:
     void read();
     void create_table();
-    void insert_entry(FolderEntry &folder);
+    void insert_entry(FolderItem &folder);
     void insert_all_entries();
-    void insert_all_entries(std::vector<FolderEntry> &folders);
+    void insert_all_entries(std::vector<FolderItem> &folders);
 };
 
 }

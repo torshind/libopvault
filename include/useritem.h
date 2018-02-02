@@ -1,21 +1,21 @@
 #ifndef USERENTRY_H
 #define USERENTRY_H
 
-#include "baseentry.h"
+#include "baseitem.h"
 
 namespace OPVault {
 
-class UserEntry : protected BaseEntry {
+class UserItem : protected BaseItem {
 protected:
-    UserEntry() {
+    UserItem() {
         tx = 0;
     }
 
-    UserEntry(long _created,
-              std::string _o,
-              long _tx,
-              long _updated,
-              std::string _uuid) :
+    UserItem(long _created,
+             std::string _o,
+             long _tx,
+             long _updated,
+             std::string _uuid) :
         created(_created),
         o(_o),
         tx(_tx),
@@ -25,7 +25,7 @@ protected:
 
     virtual void init();
 
-    virtual ~UserEntry() {}
+    virtual ~UserItem() {}
 
 public:
     std::string& get_overview() { return o; }

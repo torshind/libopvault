@@ -52,7 +52,7 @@ Vault::Vault(const std::string &cloud_data_dir, const std::string &local_data_di
             profile.derive_keys(master_password);
             profile.get_overview_key();
             profile.get_master_key();
-            sync(cloud_data_dir);
+            sync();
         }
     }
     catch (...) {
@@ -106,7 +106,7 @@ void Vault::get_profile() {
     sqlite3_close(db);
 }
 
-void Vault::get_folders(std::vector<FolderEntry> &folders) const {
+void Vault::get_folders(std::vector<FolderItem> &folders) const {
     sqlite3 *db;
     int rc;
 
@@ -137,7 +137,7 @@ void Vault::get_folders(std::vector<FolderEntry> &folders) const {
                 sqlite3_close(db);
                 throw std::runtime_error(os.str());
             }
-            FolderEntry folder;
+            FolderItem folder;
             folder.created = sqlite3_column_int(stmt, 0);
             folder.o = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
             folder.tx = sqlite3_column_int(stmt, 2);
@@ -151,12 +151,12 @@ void Vault::get_folders(std::vector<FolderEntry> &folders) const {
     sqlite3_close(db);
 }
 
-void Vault::set_folders(std::vector<FolderEntry> &folders) {
+void Vault::set_folders(std::vector<FolderItem> &folders) {
     Folder folder;
     folder.insert_all_entries(folders);
 }
 
-void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) const {
+void Vault::get_items_query(const char query[], std::vector<BandItem> &items) const {
     sqlite3 *db;
     int rc;
 
@@ -183,7 +183,7 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) c
                 sqlite3_close(db);
                 throw std::runtime_error(os.str());
             }
-            BandEntry item;
+            BandItem item;
             item.created = sqlite3_column_int(stmt, 0);
             item.o = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
             item.tx = sqlite3_column_int(stmt, 2);
@@ -234,19 +234,19 @@ void Vault::create_db(const std::string &cloud_data_dir) {
         throw;
     }
     band.create_table();
-    band.insert_all_entries();
+    band.insert_all_items();
 }
 
-void Vault::get_items(std::vector<BandEntry> &items) const {
+void Vault::get_items(std::vector<BandItem> &items) const {
     get_items_query(SQL_SELECT_ITEMS, items);
 }
 
-void Vault::set_items(std::vector<BandEntry> &items) {
+void Vault::insert_items(std::vector<BandItem> &items) {
     Band band;
-    band.insert_all_entries(items);
+    band.insert_all_items(items);
 }
 
-void Vault::get_items_folder(const std::string &folder, std::vector<BandEntry> &items) const {
+void Vault::get_items_folder(const std::string &folder, std::vector<BandItem> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_FOLDER, folder.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
@@ -256,7 +256,7 @@ void Vault::get_items_folder(const std::string &folder, std::vector<BandEntry> &
     free(buf);
 }
 
-void Vault::get_items_category(const std::string &category, std::vector<BandEntry> &items) const {
+void Vault::get_items_category(const std::string &category, std::vector<BandItem> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_CATEGORY, category.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
@@ -266,7 +266,7 @@ void Vault::get_items_category(const std::string &category, std::vector<BandEntr
     free(buf);
 }
 
-void Vault::sync(const std::string &cloud_data_dir) {
+void Vault::sync() {
     Folder folders;
     try {
 //        folders.sync();
@@ -277,7 +277,9 @@ void Vault::sync(const std::string &cloud_data_dir) {
 
     Band band;
     try {
-//        band.sync();
+        std::vector<BandItem> items;
+        get_items(items);
+        band.sync(items);
     }
     catch (...) {
         throw;

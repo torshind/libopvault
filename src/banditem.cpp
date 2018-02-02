@@ -34,17 +34,17 @@ SOFTWARE.
 #include "const.h"
 #include "vault.h"
 
-#include "bandentry.h"
+#include "banditem.h"
 
 using namespace CryptoPP;
 
 namespace OPVault {
 
-void BandEntry::verify_key() {
+void BandItem::verify_key() {
     // TODO: verify key using master mac key
 }
 
-void BandEntry::decrypt_key(SecByteBlock &key) {
+void BandItem::decrypt_key(SecByteBlock &key) {
     std::string encrypted_key;
     StringSource(k, true, new Base64Decoder(new StringSink(encrypted_key)));
 
@@ -58,7 +58,7 @@ void BandEntry::decrypt_key(SecByteBlock &key) {
     StringSource(ciphertext, true, new StreamTransformationFilter(decryption, new ArraySink(key.data(), key.size()), StreamTransformationFilter::NO_PADDING));
 }
 
-void BandEntry::decrypt_data(std::string& data) {
+void BandItem::decrypt_data(std::string& data) {
     if (!d.empty()) {
         verify();
         SecByteBlock item_key;
@@ -69,7 +69,7 @@ void BandEntry::decrypt_data(std::string& data) {
     }
 }
 
-std::string BandEntry::hmac_in_str() {
+std::string BandItem::hmac_in_str() {
     return std::string(
                 "category" + category +
                 "created" + std::to_string(created) +
@@ -85,7 +85,7 @@ std::string BandEntry::hmac_in_str() {
                 );
 }
 
-void BandEntry::verify() {
+void BandItem::verify() {
     std::string input;
     StringSource(hmac, true, new Base64Decoder(new StringSink(input)));
 
@@ -98,8 +98,8 @@ void BandEntry::verify() {
     StringSource(input, true, new HashVerificationFilter(_hmac, nullptr, flags));
 }
 
-void BandEntry::init() {
-    UserEntry::init();
+void BandItem::init() {
+    UserItem::init();
 
     // Generate key
     AutoSeededRandomPool prng;
@@ -127,7 +127,7 @@ void BandEntry::init() {
     StringSource(std::string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
 }
 
-void BandEntry::set_category(const std::string &_category) {
+void BandItem::set_category(const std::string &_category) {
     category = _category;
     updateState = true;
     if (uuid.empty()) {
@@ -135,7 +135,7 @@ void BandEntry::set_category(const std::string &_category) {
     }
 }
 
-void BandEntry::set_data(const std::string &_d) {
+void BandItem::set_data(const std::string &_d) {
     updated = time(nullptr);
     updateState = true;
     if (uuid.empty()) {
@@ -159,7 +159,7 @@ void BandEntry::set_data(const std::string &_d) {
     encrypt_opdata(_d, iv, item_key, d);
 }
 
-void BandEntry::set_fave(const unsigned long _fave) {
+void BandItem::set_fave(const unsigned long _fave) {
     fave = _fave;
     updateState = true;
     if (uuid.empty()) {
@@ -167,7 +167,7 @@ void BandEntry::set_fave(const unsigned long _fave) {
     }
 }
 
-void BandEntry::set_folder(const std::string &_folder) {
+void BandItem::set_folder(const std::string &_folder) {
     folder = _folder;
     updateState = true;
     if (uuid.empty()) {
@@ -175,7 +175,7 @@ void BandEntry::set_folder(const std::string &_folder) {
     }
 }
 
-void BandEntry::set_trashed(const int _trashed) {
+void BandItem::set_trashed(const int _trashed) {
     trashed = _trashed;
     updateState = true;
     if (uuid.empty()) {
@@ -183,7 +183,7 @@ void BandEntry::set_trashed(const int _trashed) {
     }
 }
 
-void BandEntry::generate_hmac() {
+void BandItem::generate_hmac() {
     // HMAC
     std::string mac;
     std::string input = hmac_in_str();

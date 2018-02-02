@@ -25,7 +25,7 @@ SOFTWARE.
 
 #include "dbg.h"
 #include "const.h"
-#include "bandentry.h"
+#include "banditem.h"
 #include "vault.h"
 
 #include "band.h"
@@ -49,20 +49,9 @@ void Band::read() {
             continue;
         }
         for(auto it=data.begin(); it!=data.end(); ++it) {
-            BandEntry item;
+            BandItem item;
             try {
-                item = BandEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
-                                  (*it)["o"].is_string() ? (*it)["o"].get<std::string>() : "NULL",
-                                  (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
-                                  (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
-                                  (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL",
-                                  (*it)["category"].is_string() ? (*it)["category"].get<std::string>() : "NULL",
-                                  (*it)["d"].is_string() ? (*it)["d"].get<std::string>() : "NULL",
-                                  (*it)["fave"].is_number_integer() ? (*it)["fave"].get<unsigned long>() : 0,
-                                  (*it)["folder"].is_string() ? (*it)["folder"].get<std::string>() : "NULL",
-                                  (*it)["hmac"].is_string() ? (*it)["hmac"].get<std::string>() : "NULL",
-                                  (*it)["k"].is_string() ? (*it)["k"].get<std::string>() : "NULL",
-                                  (*it)["trashed"].is_boolean() ? (*it)["trashed"].get<int>() : -1 );
+                item = it2item(*it);
             }
             catch (...) {
                 throw;
@@ -76,8 +65,8 @@ void Band::create_table() {
     sql_exec(SQL_CREATE_ITEMS);
 }
 
-void Band::insert_entry(BandEntry &item) {
-    int sz = snprintf(nullptr, 0, SQL_REPLACE_ITEMS_ENTRY,
+void Band::insert_item(BandItem &item) {
+    int sz = snprintf(nullptr, 0, SQL_REPLACE_ITEM,
                       item.created,
                       item.o.c_str(),
                       item.tx,
@@ -92,7 +81,7 @@ void Band::insert_entry(BandEntry &item) {
                       item.trashed) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_REPLACE_ITEMS_ENTRY,
+    snprintf(buf, (size_t) sz, SQL_REPLACE_ITEM,
              item.created,
              item.o.c_str(),
              item.tx,
@@ -112,25 +101,111 @@ void Band::insert_entry(BandEntry &item) {
     free(buf);
 }
 
-void Band::insert_all_entries() {
+void Band::insert_all_items() {
     for(auto it=items.begin(); it!=items.end(); ++it) {
-        insert_entry(*it);
+        insert_item(*it);
     }
 }
 
-void Band::insert_all_entries(std::vector<BandEntry> &items) {
+void Band::insert_all_items(std::vector<BandItem> &items) {
     for(auto it=items.begin(); it!=items.end(); ++it) {
         if (it->updateState) {
             it->generate_hmac();
-            insert_entry(*it);
+            insert_item(*it);
             it->updateState = false;
+        } else {
+            insert_item(*it);
         }
     }
 }
 
-void Band::sync() {
-    //local changes: local.updated > local.tx
-    //remote changes: remote.tx > local.tx
+void Band::sync(std::vector<BandItem> &items) {
+    std::unordered_map<std::string, BandItem*> local_map;
+
+    for (auto it=items.begin(); it!=items.end(); ++it) {
+        // Create a map with key uuid for local items
+        local_map.insert({it->uuid, &*it});
+    }
+
+    int exept_count = 0;
+    for (int index=0; index<BAND_NUM; ++index) {
+        try {
+            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
+        }
+        catch (...) {
+            exept_count++;
+            if (exept_count == BAND_NUM)
+            {
+                throw;
+            }
+            continue;
+        }
+        for(auto it=data.begin(); it!=data.end(); ++it) {
+            // Find uuid in local map
+            std::string uuid = (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL";
+
+            auto found = local_map.find(uuid);
+            if (found != local_map.end()) {
+                // Check for local changes: local.updated > local.tx
+                DBGVAR(found->second->updated);
+                DBGVAR(found->second->tx);
+                if (found->second->updated > found->second->tx) {
+                    DBGMSG("sync remote with local item");
+                    // Remove from map
+                    local_map.erase(found->first);
+                } else {
+                    // Check for remote changes: remote.tx > local.tx
+                    long tx;
+                    try {
+                        tx = (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1;
+                    }
+                    catch (...) {
+                        throw;
+                    }
+                    DBGVAR(tx);
+                    if (tx > found->second->tx) {
+                        DBGMSG("sync local with remote item");
+                        BandItem item;
+                        try {
+                            item = it2item(*it);
+                        }
+                        catch (...) {
+                            throw;
+                        }
+                        insert_item(item);
+                        // Remove from map
+                        local_map.erase(found->first);
+                    }
+                }
+            } else {
+                // New remote item: insert in db
+                BandItem item;
+                try {
+                    item = it2item(*it);
+                }
+                catch (...) {
+                    throw;
+                }
+                insert_item(item);
+            }
+        }
+    }
+    // New local items: sync new elements still in the map
+}
+
+BandItem Band::it2item(json &j) {
+  return BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+                  j["o"].is_string() ? j["o"].get<std::string>() : "NULL",
+                  j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+                  j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+                  j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
+                  j["category"].is_string() ? j["category"].get<std::string>() : "NULL",
+                  j["d"].is_string() ? j["d"].get<std::string>() : "NULL",
+                  j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
+                  j["folder"].is_string() ? j["folder"].get<std::string>() : "NULL",
+                  j["hmac"].is_string() ? j["hmac"].get<std::string>() : "NULL",
+                  j["k"].is_string() ? j["k"].get<std::string>() : "NULL",
+                  j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
 }
 
 }

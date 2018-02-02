@@ -23,33 +23,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef FOLDERENTRY_H
-#define FOLDERENTRY_H
+#ifndef BASEENTRY_H
+#define BASEENTRY_H
 
-#include "userentry.h"
+#include <string>
+#include <cryptopp/secblock.h>
 
 namespace OPVault {
 
-class FolderEntry : public UserEntry {
-    friend class Vault;
-    friend class Folder;
-public:
-    FolderEntry() {}
+class BaseItem
+{
+protected:
+    BaseItem() {}
 
-private:
-    FolderEntry(long _created,
-                std::string _o,
-                long _tx,
-                long _updated,
-                std::string _uuid) :
-        UserEntry(_created,
-                  _o,
-                  _tx,
-                  _updated,
-                  _uuid)
-    {}
+    static CryptoPP::SecByteBlock derived_key;
+    static CryptoPP::SecByteBlock overview_key;
+    static CryptoPP::SecByteBlock master_key;
+
+    void verify_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key);
+    void decrypt_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key, std::string &plaintext);
+    void encrypt_opdata(const std::string &plaintext, const CryptoPP::SecByteBlock &iv, const CryptoPP::SecByteBlock &key, std::string &encoded_opdata);
 };
 
 }
 
-#endif // FOLDERENTRY_H
+#endif // BASEENTRY_H

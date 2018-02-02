@@ -27,19 +27,19 @@ SOFTWARE.
 
 #include <uuid/uuid.h>
 
-#include "userentry.h"
+#include "useritem.h"
 
 using namespace CryptoPP;
 
 namespace OPVault {
 
-void UserEntry::decrypt_overview(std::string& overview) {
+void UserItem::decrypt_overview(std::string& overview) {
     if (!o.empty()) {
         decrypt_opdata(o, overview_key, overview);
     }
 }
 
-void UserEntry::init() {
+void UserItem::init() {
     created = time(nullptr);
 
     // Generate UUID
@@ -52,7 +52,7 @@ void UserEntry::init() {
     uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
 }
 
-void UserEntry::set_overview(const std::string &_o) {
+void UserItem::set_overview(const std::string &_o) {
     updated = time(nullptr);
     updateState = true;
     if (uuid.empty()) {

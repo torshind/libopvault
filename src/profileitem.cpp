@@ -30,13 +30,13 @@ SOFTWARE.
 #include <cryptopp/sha3.h>
 
 #include "const.h"
-#include "profileentry.h"
+#include "profileitem.h"
 
 using namespace CryptoPP;
 
 namespace OPVault {
 
-void ProfileEntry::derive_keys(const std::string &master_password) {
+void ProfileItem::derive_keys(const std::string &master_password) {
     std::string salt;
     StringSource(this->salt, true, new Base64Decoder(new StringSink(salt)));
 
@@ -54,18 +54,18 @@ void ProfileEntry::derive_keys(const std::string &master_password) {
     }
 }
 
-void ProfileEntry::get_profile_key(const std::string &encoded_key_opdata, SecByteBlock &profile_key) {
+void ProfileItem::get_profile_key(const std::string &encoded_key_opdata, SecByteBlock &profile_key) {
     std::string opdata_key;
     decrypt_opdata(encoded_key_opdata, derived_key, opdata_key);
 
     SHA512().CalculateDigest(profile_key, reinterpret_cast<const unsigned char *> (opdata_key.data()), opdata_key.length());
 }
 
-void ProfileEntry::get_master_key() {
+void ProfileItem::get_master_key() {
     get_profile_key(masterKey, master_key);
 }
 
-void ProfileEntry::get_overview_key() {
+void ProfileItem::get_overview_key() {
     get_profile_key(overviewKey, overview_key);
 }
 

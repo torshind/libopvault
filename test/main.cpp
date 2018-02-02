@@ -29,13 +29,13 @@ SOFTWARE.
 #include "profile.h"
 #include "folder.h"
 #include "band.h"
-#include "baseentry.h"
+#include "baseitem.h"
 
 using namespace std;
 using namespace OPVault;
 
 static void get_items(const Vault &vault) {
-    vector<BandEntry> items;
+    vector<BandItem> items;
 
     vault.get_items(items);
     for(auto it=items.begin(); it!=items.end(); ++it) {
@@ -54,7 +54,7 @@ static void get_items(const Vault &vault) {
 }
 
 static void get_folders(const Vault &vault) {
-    vector<FolderEntry> folders;
+    vector<FolderItem> folders;
 
     vault.get_folders(folders);
     for(auto it=folders.begin(); it!=folders.end(); ++it) {
@@ -66,8 +66,8 @@ static void get_folders(const Vault &vault) {
 }
 
 static void get_items_folder(const Vault &vault) {
-    vector<FolderEntry> folders;
-    vector<BandEntry> items;
+    vector<FolderItem> folders;
+    vector<BandItem> items;
 
     vault.get_folders(folders);
 
@@ -88,7 +88,7 @@ static void get_items_folder(const Vault &vault) {
 }
 
 static void get_items_category(const Vault &vault) {
-    vector<BandEntry> items;
+    vector<BandItem> items;
 
     for(auto it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
         cout << "Category " << it1->second << endl;
@@ -134,38 +134,38 @@ int main(int argc, char *argv[])
         // OPEN VAULT
         Vault vault(cloud_data_dir, local_data_dir, master_password);
 
-        vector<FolderEntry> folders;
-        vector<BandEntry> items;
+        vector<FolderItem> folders;
+        vector<BandItem> items;
 
         // INSERT NEW ITEMS
         items.clear();
-        BandEntry item1;
+        BandItem item1;
         item1.set_category("001");
         items.push_back(item1);
-        BandEntry item2;
+        BandItem item2;
         item2.set_data("{DATA2}");
         items.push_back(item2);
-        BandEntry item3;
+        BandItem item3;
         item3.set_folder("FOLDER3");
         items.push_back(item3);
-        BandEntry item4;
+        BandItem item4;
         item4.set_overview("{OVERVIEW4}");
         items.push_back(item4);
-        BandEntry item5;
+        BandItem item5;
         item5.set_fave(5000);
         items.push_back(item5);
-        BandEntry item6;
+        BandItem item6;
         item6.set_trashed(1);
         items.push_back(item6);
-        BandEntry item7;
+        BandItem item7;
         item7.set_category("099");
         item7.set_data("{DATA7}");
         item7.set_overview("{OVERVIEW7}");
         items.push_back(item7);
-        vault.set_items(items);
+        vault.insert_items(items);
 
         // INSERT NEW FOLDER
-        FolderEntry folder;
+        FolderItem folder;
         folder.set_overview("{\"title\":\"Mordor\"}");
         folders.push_back(folder);
         vault.set_folders(folders);
@@ -193,11 +193,18 @@ int main(int argc, char *argv[])
         items[6].set_data("{DATA7.7}");
         items[6].set_overview("{OVERVIEW7.7}");
 
-        vault.set_items(items);
+        vault.insert_items(items);
 
         // CHECK MODIFIED DATA
         get_folders(vault);
         get_items(vault);
+    }
+
+    {
+        // OPEN VAULT
+        Vault vault(cloud_data_dir, local_data_dir, master_password);
+
+        vault.sync();
     }
 
     // RESET LOCAL DB

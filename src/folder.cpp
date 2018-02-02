@@ -42,11 +42,11 @@ void Folder::read() {
     }
 
     for(auto it = data.begin(); it !=data.end(); ++it) {
-        FolderEntry folder = FolderEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
-                                          (*it)["overview"].is_string() ? (*it)["overview"].get<std::string>() : "NULL",
-                                          (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
-                                          (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
-                                          (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL" );
+        FolderItem folder = FolderItem( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
+                                        (*it)["overview"].is_string() ? (*it)["overview"].get<std::string>() : "NULL",
+                                        (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
+                                        (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
+                                        (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL" );
         folders.push_back(folder);
     }
 }
@@ -55,8 +55,8 @@ void Folder::create_table() {
     sql_exec(SQL_CREATE_FOLDERS);
 }
 
-void Folder::insert_entry(FolderEntry &folder) {
-    int sz = snprintf(nullptr, 0, SQL_REPLACE_FOLDERS_ENTRY,
+void Folder::insert_entry(FolderItem &folder) {
+    int sz = snprintf(nullptr, 0, SQL_REPLACE_FOLDER,
                       folder.created,
                       folder.o.c_str(),
                       folder.tx,
@@ -64,7 +64,7 @@ void Folder::insert_entry(FolderEntry &folder) {
                       folder.uuid.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_REPLACE_FOLDERS_ENTRY,
+    snprintf(buf, (size_t) sz, SQL_REPLACE_FOLDER,
              folder.created,
              folder.o.c_str(),
              folder.tx,
@@ -83,7 +83,7 @@ void Folder::insert_all_entries() {
     }
 }
 
-void Folder::insert_all_entries(std::vector<FolderEntry> &folders) {
+void Folder::insert_all_entries(std::vector<FolderItem> &folders) {
     for(auto it=folders.begin(); it!=folders.end(); ++it) {
         if (it->updateState) {
             insert_entry(*it);

@@ -26,33 +26,33 @@ SOFTWARE.
 #ifndef PROFILEENTRY_H
 #define PROFILEENTRY_H
 
-#include "baseentry.h"
+#include "baseitem.h"
 
 namespace OPVault {
 
-class ProfileEntry : public BaseEntry
+class ProfileItem : public BaseItem
 {
     friend class Vault;
     friend class Profile;
 
 public:
-    ProfileEntry() {}
+    ProfileItem() {}
 
     void derive_keys(const std::string &master_password);
     void get_master_key();
     void get_overview_key();
 
 private:
-    ProfileEntry(std::string _lastUpdatedBy,
-                 long _updatedAt,
-                 std::string _profileName,
-                 std::string _salt,
-                 std::string _passwordHint,
-                 std::string _masterKey,
-                 unsigned int _iterations,
-                 std::string _uuid,
-                 std::string _overviewKey,
-                 long _createdAt) :
+    ProfileItem(std::string _lastUpdatedBy,
+                long _updatedAt,
+                std::string _profileName,
+                std::string _salt,
+                std::string _passwordHint,
+                std::string _masterKey,
+                unsigned int _iterations,
+                std::string _uuid,
+                std::string _overviewKey,
+                long _createdAt) :
         lastUpdatedBy(_lastUpdatedBy),
         updatedAt(_updatedAt),
         profileName(_profileName),

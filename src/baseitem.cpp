@@ -33,17 +33,17 @@ SOFTWARE.
 #include "const.h"
 #include "dbg.h"
 
-#include "baseentry.h"
+#include "baseitem.h"
 
 using namespace CryptoPP;
 
 namespace OPVault {
 
-SecByteBlock BaseEntry::derived_key(KEY_LENGTH);
-SecByteBlock BaseEntry::master_key(KEY_LENGTH);
-SecByteBlock BaseEntry::overview_key(KEY_LENGTH);
+SecByteBlock BaseItem::derived_key(KEY_LENGTH);
+SecByteBlock BaseItem::master_key(KEY_LENGTH);
+SecByteBlock BaseItem::overview_key(KEY_LENGTH);
 
-void BaseEntry::verify_opdata(const std::string &encoded_opdata, const SecByteBlock &key) {
+void BaseItem::verify_opdata(const std::string &encoded_opdata, const SecByteBlock &key) {
     std::string opdata;
     StringSource(encoded_opdata, true, new Base64Decoder(new StringSink(opdata)));
 
@@ -53,7 +53,7 @@ void BaseEntry::verify_opdata(const std::string &encoded_opdata, const SecByteBl
     StringSource(opdata, true, new HashVerificationFilter(hmac, nullptr, flags));
 }
 
-void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const SecByteBlock &key, std::string &plaintext) {
+void BaseItem::decrypt_opdata(const std::string &encoded_opdata, const SecByteBlock &key, std::string &plaintext) {
     try {
         verify_opdata(encoded_opdata, key);
     }
@@ -95,7 +95,7 @@ void BaseEntry::decrypt_opdata(const std::string &encoded_opdata, const SecByteB
     DBGVAR(plaintext);
 }
 
-void BaseEntry::encrypt_opdata(const std::string &plaintext, const SecByteBlock &iv, const SecByteBlock &key, std::string &encoded_opdata) {
+void BaseItem::encrypt_opdata(const std::string &plaintext, const SecByteBlock &iv, const SecByteBlock &key, std::string &encoded_opdata) {
     std::string ciphertext;
 
     // Padding

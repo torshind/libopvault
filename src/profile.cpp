@@ -39,16 +39,16 @@ void Profile::read() {
     catch (...) {
         throw;
     }
-    profile = ProfileEntry( data["lastUpdatedBy"].is_string() ? data["lastUpdatedBy"].get<std::string>() : "NULL",
-                            data["updatedAt"].is_number_integer() ? data["updatedAt"].get<long>() : -1,
-                            data["profileName"].is_string() ? data["profileName"].get<std::string>() : "NULL",
-                            data["salt"].is_string() ? data["salt"].get<std::string>() : "NULL",
-                            data["passwordHint"].is_string() ? data["passwordHint"].get<std::string>() : "NULL",
-                            data["masterKey"].is_string() ? data["masterKey"].get<std::string>() : "NULL",
-                            data["iterations"].is_number_integer() ? data["iterations"].get<unsigned int>() : 0,
-                            data["uuid"].is_string() ? data["uuid"].get<std::string>() : "NULL",
-                            data["overviewKey"].is_string() ? data["overviewKey"].get<std::string>() : "NULL",
-                            data["createdAt"].is_number_integer() ? data["createdAt"].get<long>() : -1 );
+    profile = ProfileItem( data["lastUpdatedBy"].is_string() ? data["lastUpdatedBy"].get<std::string>() : "NULL",
+                           data["updatedAt"].is_number_integer() ? data["updatedAt"].get<long>() : -1,
+                           data["profileName"].is_string() ? data["profileName"].get<std::string>() : "NULL",
+                           data["salt"].is_string() ? data["salt"].get<std::string>() : "NULL",
+                           data["passwordHint"].is_string() ? data["passwordHint"].get<std::string>() : "NULL",
+                           data["masterKey"].is_string() ? data["masterKey"].get<std::string>() : "NULL",
+                           data["iterations"].is_number_integer() ? data["iterations"].get<unsigned int>() : 0,
+                           data["uuid"].is_string() ? data["uuid"].get<std::string>() : "NULL",
+                           data["overviewKey"].is_string() ? data["overviewKey"].get<std::string>() : "NULL",
+                           data["createdAt"].is_number_integer() ? data["createdAt"].get<long>() : -1 );
 }
 
 int Profile::read_updatedAt() {
@@ -66,7 +66,7 @@ void Profile::create_table() {
 }
 
 void Profile::insert_entry() {
-    int sz = snprintf(nullptr, 0, SQL_INSERT_PROFILE_ENTRY,
+    int sz = snprintf(nullptr, 0, SQL_INSERT_PROFILE_ITEM,
                       profile.lastUpdatedBy.c_str(),
                       profile.updatedAt,
                       profile.profileName.c_str(),
@@ -79,7 +79,7 @@ void Profile::insert_entry() {
                       profile.createdAt) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_INSERT_PROFILE_ENTRY,
+    snprintf(buf, (size_t) sz, SQL_INSERT_PROFILE_ITEM,
              profile.lastUpdatedBy.c_str(),
              profile.updatedAt,
              profile.profileName.c_str(),

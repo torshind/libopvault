@@ -27,7 +27,7 @@ SOFTWARE.
 #define BAND_H
 
 #include "file.h"
-#include "bandentry.h"
+#include "banditem.h"
 
 namespace OPVault {
 
@@ -39,15 +39,18 @@ protected:
     Band() {}
 
 private:
-    std::vector<BandEntry> items;
+    std::vector<BandItem> items;
 
 public:
     void read();
     void create_table();
-    void insert_entry(BandEntry &item);
-    void insert_all_entries();
-    void insert_all_entries(std::vector<BandEntry> &items);
-    void sync();
+    void insert_item(BandItem &item);
+    void insert_all_items();
+    void insert_all_items(std::vector<BandItem> &items);
+    void sync(std::vector<BandItem> &items);
+
+private:
+    static BandItem it2item(nlohmann::json &j);
 };
 
 }

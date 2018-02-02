@@ -26,7 +26,7 @@ SOFTWARE.
 #ifndef PROFILE_H
 #define PROFILE_H
 
-#include "profileentry.h"
+#include "profileitem.h"
 
 #include "file.h"
 
@@ -38,7 +38,7 @@ public:
     Profile() {}
 
 private:
-    ProfileEntry profile;
+    ProfileItem profile;
 
 public:
     void read();
