@@ -43,6 +43,7 @@ private:
     ProfileItem profile;
 
     void get_profile();
+    void setup_profile(const std::string &master_password);
     void get_items_query(const char query[], std::vector<BandItem> &items) const;
     void create_db(const std::string &cloud_data_dir);
 

@@ -37,6 +37,9 @@ Vault::Vault(const std::string &cloud_data_dir, const std::string &local_data_di
     } else {
         DBGMSG("create DB");
         create_db(cloud_data_dir);
+        get_profile();
+        setup_profile(master_password);
+        return;
     }
 
     Profile pro;
@@ -49,9 +52,7 @@ Vault::Vault(const std::string &cloud_data_dir, const std::string &local_data_di
             remove(std::string(local_data_dir + "opvault.db").c_str());
             create_db(cloud_data_dir);
         } else {
-            profile.derive_keys(master_password);
-            profile.get_overview_key();
-            profile.get_master_key();
+            setup_profile(master_password);
             sync();
         }
     }
@@ -104,6 +105,12 @@ void Vault::get_profile() {
     }
 
     sqlite3_close(db);
+}
+
+void Vault::setup_profile(const std::string &master_password) {
+    profile.derive_keys(master_password);
+    profile.get_overview_key();
+    profile.get_master_key();
 }
 
 void Vault::get_folders(std::vector<FolderItem> &folders) const {

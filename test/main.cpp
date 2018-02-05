@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 {
     string master_password = u8"freddy";
     string cloud_data_dir = "./onepassword_data/default";
+    string cloud_sync_test_data_dir = "./onepassword_data/sync_test";
     string local_data_dir = "./";
 
     {
@@ -202,9 +203,7 @@ int main(int argc, char *argv[])
 
     {
         // OPEN VAULT
-        Vault vault(cloud_data_dir, local_data_dir, master_password);
-
-        vault.sync();
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
     }
 
     // RESET LOCAL DB

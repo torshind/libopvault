@@ -41,6 +41,8 @@ protected:
 private:
     std::vector<BandItem> items;
 
+    static BandItem it2item(nlohmann::json &j);
+
 public:
     void read();
     void create_table();
@@ -48,9 +50,6 @@ public:
     void insert_all_items();
     void insert_all_items(std::vector<BandItem> &items);
     void sync(std::vector<BandItem> &items);
-
-private:
-    static BandItem it2item(nlohmann::json &j);
 };
 
 }

@@ -146,23 +146,29 @@ void Band::sync(std::vector<BandItem> &items) {
 
             auto found = local_map.find(uuid);
             if (found != local_map.end()) {
+                // Get remote tx
+                long tx;
+                try {
+                    tx = (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1;
+                }
+                catch (...) {
+                    throw;
+                }
+                DBGVAR(tx);
+
                 // Check for local changes: local.updated > local.tx
                 DBGVAR(found->second->updated);
                 DBGVAR(found->second->tx);
                 if (found->second->updated > found->second->tx) {
-                    DBGMSG("sync remote with local item");
-                    // Remove from map
-                    local_map.erase(found->first);
+                    if (tx > found->second->tx) {
+                        DBGMSG("merge local & remote changes");
+                    } else {
+                        DBGMSG("sync remote with local item");
+                        // Remove from map
+                        local_map.erase(found->first);
+                    }
                 } else {
                     // Check for remote changes: remote.tx > local.tx
-                    long tx;
-                    try {
-                        tx = (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1;
-                    }
-                    catch (...) {
-                        throw;
-                    }
-                    DBGVAR(tx);
                     if (tx > found->second->tx) {
                         DBGMSG("sync local with remote item");
                         BandItem item;
@@ -179,6 +185,7 @@ void Band::sync(std::vector<BandItem> &items) {
                 }
             } else {
                 // New remote item: insert in db
+                DBGMSG("new remote item");
                 BandItem item;
                 try {
                     item = it2item(*it);
@@ -191,6 +198,9 @@ void Band::sync(std::vector<BandItem> &items) {
         }
     }
     // New local items: sync new elements still in the map
+    if (!local_map.empty()) {
+        DBGMSG("new local item");
+    }
 }
 
 BandItem Band::it2item(json &j) {
