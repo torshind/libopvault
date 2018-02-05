@@ -224,24 +224,23 @@ void Vault::create_db(const std::string &cloud_data_dir) {
     pro.insert_entry();
 
     Folder folders;
+    folders.create_table();
     try {
         folders.read();
     }
     catch (...) {
         throw;
     }
-    folders.create_table();
     folders.insert_all_entries();
 
     Band band;
+    band.create_table();
     try {
         band.read();
     }
     catch (...) {
         throw;
     }
-    band.create_table();
-    band.insert_all_items();
 }
 
 void Vault::get_items(std::vector<BandItem> &items) const {
@@ -250,7 +249,7 @@ void Vault::get_items(std::vector<BandItem> &items) const {
 
 void Vault::insert_items(std::vector<BandItem> &items) {
     Band band;
-    band.insert_all_items(items);
+    band.insert_items(items);
 }
 
 void Vault::get_items_folder(const std::string &folder, std::vector<BandItem> &items) const {

@@ -49,14 +49,7 @@ void Band::read() {
             continue;
         }
         for(auto it=data.begin(); it!=data.end(); ++it) {
-            BandItem item;
-            try {
-                item = it2item(*it);
-            }
-            catch (...) {
-                throw;
-            }
-            items.push_back(item);
+            insert_json(*it);
         }
     }
 }
@@ -101,13 +94,7 @@ void Band::insert_item(BandItem &item) {
     free(buf);
 }
 
-void Band::insert_all_items() {
-    for(auto it=items.begin(); it!=items.end(); ++it) {
-        insert_item(*it);
-    }
-}
-
-void Band::insert_all_items(std::vector<BandItem> &items) {
+void Band::insert_items(std::vector<BandItem> &items) {
     for(auto it=items.begin(); it!=items.end(); ++it) {
         if (it->updateState) {
             it->generate_hmac();
@@ -171,14 +158,8 @@ void Band::sync(std::vector<BandItem> &items) {
                     // Check for remote changes: remote.tx > local.tx
                     if (tx > found->second->tx) {
                         DBGMSG("sync local with remote item");
-                        BandItem item;
-                        try {
-                            item = it2item(*it);
-                        }
-                        catch (...) {
-                            throw;
-                        }
-                        insert_item(item);
+                        insert_json(*it);
+
                         // Remove from map
                         local_map.erase(found->first);
                     }
@@ -186,14 +167,7 @@ void Band::sync(std::vector<BandItem> &items) {
             } else {
                 // New remote item: insert in db
                 DBGMSG("new remote item");
-                BandItem item;
-                try {
-                    item = it2item(*it);
-                }
-                catch (...) {
-                    throw;
-                }
-                insert_item(item);
+                insert_json(*it);
             }
         }
     }
@@ -203,19 +177,30 @@ void Band::sync(std::vector<BandItem> &items) {
     }
 }
 
-BandItem Band::it2item(json &j) {
-  return BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
-                  j["o"].is_string() ? j["o"].get<std::string>() : "NULL",
-                  j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
-                  j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
-                  j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
-                  j["category"].is_string() ? j["category"].get<std::string>() : "NULL",
-                  j["d"].is_string() ? j["d"].get<std::string>() : "NULL",
-                  j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
-                  j["folder"].is_string() ? j["folder"].get<std::string>() : "NULL",
-                  j["hmac"].is_string() ? j["hmac"].get<std::string>() : "NULL",
-                  j["k"].is_string() ? j["k"].get<std::string>() : "NULL",
-                  j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
+BandItem Band::json2item(json &j) {
+    return BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+                    j["o"].is_string() ? j["o"].get<std::string>() : "NULL",
+                    j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+                    j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+                    j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
+                    j["category"].is_string() ? j["category"].get<std::string>() : "NULL",
+                    j["d"].is_string() ? j["d"].get<std::string>() : "NULL",
+                    j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
+                    j["folder"].is_string() ? j["folder"].get<std::string>() : "NULL",
+                    j["hmac"].is_string() ? j["hmac"].get<std::string>() : "NULL",
+                    j["k"].is_string() ? j["k"].get<std::string>() : "NULL",
+                    j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
+}
+
+void Band::insert_json(nlohmann::json &j) {
+    BandItem item;
+    try {
+        item = json2item(j);
+    }
+    catch (...) {
+        throw;
+    }
+    insert_item(item);
 }
 
 }
