@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include "json.hpp"
 #include "const.h"
+#include "baseitem.h"
 
 namespace OPVault {
 
@@ -37,11 +38,16 @@ class File
 {
 protected:
     File() {}
+    virtual ~File();
 
     static std::string directory;
 
     void read(const std::string &filename, nlohmann::json &j);
     void sql_exec(const char sql[]);
+
+    void insert_json(nlohmann::json &j);
+    virtual BaseItem* json2item(nlohmann::json &j) = 0;
+    virtual void insert_item(BaseItem* base_item) = 0;
 
 public:
     void set_directory(const std::string &d) { directory = d; }

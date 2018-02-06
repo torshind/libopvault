@@ -38,10 +38,8 @@ class Band : public File
 protected:
     Band() {}
 
-private:
-    static BandItem json2item(nlohmann::json &j);
-    void insert_json(nlohmann::json &j);
-    void insert_item(BandItem &item);
+    virtual BaseItem* json2item(nlohmann::json &j);
+    virtual void insert_item(BaseItem* item);
 
 public:
     void read();

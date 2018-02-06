@@ -38,10 +38,8 @@ class Folder : public File
 protected:
     Folder() {}
 
-private:
-    static FolderItem json2item(nlohmann::json &j);
-    void insert_json(nlohmann::json &j);
-    void insert_item(FolderItem &folder);
+    virtual BaseItem* json2item(nlohmann::json &j);
+    virtual void insert_item(BaseItem* base_item);
 
 public:
     void read();

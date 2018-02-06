@@ -43,6 +43,10 @@ namespace OPVault {
 
 std::string File::directory;
 
+File::~File() {
+
+}
+
 void File::read(const std::string &filename, nlohmann::json &j) {
     std::ifstream ifs(directory + "/" + filename);
     std::string file_string;
@@ -111,6 +115,18 @@ void File::sql_exec(const char sql[]) {
     sqlite3_free(zErrMsg);
     sqlite3_close(db);
 
+}
+
+void File::insert_json(nlohmann::json &j) {
+    BaseItem* item;
+    try {
+        item = json2item(j);
+    }
+    catch (...) {
+        throw;
+    }
+    insert_item(item);
+    delete item;
 }
 
 }

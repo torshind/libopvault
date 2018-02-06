@@ -51,23 +51,24 @@ void Folder::create_table() {
     sql_exec(SQL_CREATE_FOLDERS);
 }
 
-void Folder::insert_item(FolderItem &folder) {
+void Folder::insert_item(BaseItem* base_item) {
+    FolderItem* folder = static_cast<FolderItem*>(base_item);
     int sz = snprintf(nullptr, 0, SQL_REPLACE_FOLDER,
-                      folder.created,
-                      folder.o.c_str(),
-                      folder.tx,
-                      folder.updated,
-                      folder.uuid.c_str()) + 1;
+                      folder->created,
+                      folder->o.c_str(),
+                      folder->tx,
+                      folder->updated,
+                      folder->uuid.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
     snprintf(buf, (size_t) sz, SQL_REPLACE_FOLDER,
-             folder.created,
-             folder.o.c_str(),
-             folder.tx,
-             folder.updated,
-             folder.uuid.c_str());
+             folder->created,
+             folder->o.c_str(),
+             folder->tx,
+             folder->updated,
+             folder->uuid.c_str());
 
-    DBGVAR(folder.uuid);
+    DBGVAR(folder->uuid);
 
     sql_exec(buf);
     free(buf);
@@ -76,29 +77,18 @@ void Folder::insert_item(FolderItem &folder) {
 void Folder::insert_all_entries(std::vector<FolderItem> &folders) {
     for(auto it=folders.begin(); it!=folders.end(); ++it) {
         if (it->updateState) {
-            insert_item(*it);
+            insert_item(&*it);
             it->updateState = false;
         }
     }
 }
 
-FolderItem Folder::json2item(nlohmann::json &j) {
-    return FolderItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
-                      j["overview"].is_string() ? j["overview"].get<std::string>() : "NULL",
-                      j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
-                      j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
-                      j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL");
-}
-
-void Folder::insert_json(nlohmann::json &j) {
-    FolderItem item;
-    try {
-        item = json2item(j);
-    }
-    catch (...) {
-        throw;
-    }
-    insert_item(item);
+BaseItem* Folder::json2item(nlohmann::json &j) {
+    return new FolderItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+                          j["overview"].is_string() ? j["overview"].get<std::string>() : "NULL",
+                          j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+                          j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+                          j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL");
 }
 
 }

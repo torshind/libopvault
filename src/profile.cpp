@@ -60,60 +60,50 @@ void Profile::create_table() {
     sql_exec(SQL_CREATE_PROFILE);
 }
 
-void Profile::insert_item(ProfileItem profile) {
+void Profile::insert_item(BaseItem* base_item) {
+    ProfileItem* profile = static_cast<ProfileItem*>(base_item);
     int sz = snprintf(nullptr, 0, SQL_INSERT_PROFILE_ITEM,
-                      profile.lastUpdatedBy.c_str(),
-                      profile.updatedAt,
-                      profile.profileName.c_str(),
-                      profile.salt.c_str(),
-                      profile.passwordHint.c_str(),
-                      profile.masterKey.c_str(),
-                      profile.iterations,
-                      profile.uuid.c_str(),
-                      profile.overviewKey.c_str(),
-                      profile.createdAt) + 1;
+                      profile->lastUpdatedBy.c_str(),
+                      profile->updatedAt,
+                      profile->profileName.c_str(),
+                      profile->salt.c_str(),
+                      profile->passwordHint.c_str(),
+                      profile->masterKey.c_str(),
+                      profile->iterations,
+                      profile->uuid.c_str(),
+                      profile->overviewKey.c_str(),
+                      profile->createdAt) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
     snprintf(buf, (size_t) sz, SQL_INSERT_PROFILE_ITEM,
-             profile.lastUpdatedBy.c_str(),
-             profile.updatedAt,
-             profile.profileName.c_str(),
-             profile.salt.c_str(),
-             profile.passwordHint.c_str(),
-             profile.masterKey.c_str(),
-             profile.iterations,
-             profile.uuid.c_str(),
-             profile.overviewKey.c_str(),
-             profile.createdAt);
+             profile->lastUpdatedBy.c_str(),
+             profile->updatedAt,
+             profile->profileName.c_str(),
+             profile->salt.c_str(),
+             profile->passwordHint.c_str(),
+             profile->masterKey.c_str(),
+             profile->iterations,
+             profile->uuid.c_str(),
+             profile->overviewKey.c_str(),
+             profile->createdAt);
 
-    DBGVAR(profile.uuid);
+    DBGVAR(profile->uuid);
 
     sql_exec(buf);
     free(buf);
 }
 
-ProfileItem Profile::json2item(nlohmann::json &j) {
-    return ProfileItem(j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "NULL",
-                       j["updatedAt"].is_number_integer() ? j["updatedAt"].get<long>() : -1,
-                       j["profileName"].is_string() ? j["profileName"].get<std::string>() : "NULL",
-                       j["salt"].is_string() ? j["salt"].get<std::string>() : "NULL",
-                       j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "NULL",
-                       j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "NULL",
-                       j["iterations"].is_number_integer() ? j["iterations"].get<unsigned int>() : 0,
-                       j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
-                       j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "NULL",
-                       j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1);
-}
-
-void Profile::insert_json(nlohmann::json &j) {
-    ProfileItem item;
-    try {
-        item = json2item(j);
-    }
-    catch (...) {
-        throw;
-    }
-    insert_item(item);
+BaseItem* Profile::json2item(nlohmann::json &j) {
+    return new ProfileItem(j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "NULL",
+                           j["updatedAt"].is_number_integer() ? j["updatedAt"].get<long>() : -1,
+                           j["profileName"].is_string() ? j["profileName"].get<std::string>() : "NULL",
+                           j["salt"].is_string() ? j["salt"].get<std::string>() : "NULL",
+                           j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "NULL",
+                           j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "NULL",
+                           j["iterations"].is_number_integer() ? j["iterations"].get<unsigned int>() : 0,
+                           j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
+                           j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "NULL",
+                           j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1);
 }
 
 }

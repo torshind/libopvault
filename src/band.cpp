@@ -60,37 +60,38 @@ void Band::create_table() {
     sql_exec(SQL_CREATE_ITEMS);
 }
 
-void Band::insert_item(BandItem &item) {
+void Band::insert_item(BaseItem* base_item) {
+    BandItem* item = static_cast<BandItem*>(base_item);
     int sz = snprintf(nullptr, 0, SQL_REPLACE_ITEM,
-                      item.created,
-                      item.o.c_str(),
-                      item.tx,
-                      item.updated,
-                      item.uuid.c_str(),
-                      item.category.c_str(),
-                      item.d.c_str(),
-                      item.fave,
-                      item.folder.c_str(),
-                      item.hmac.c_str(),
-                      item.k.c_str(),
-                      item.trashed) + 1;
+                      item->created,
+                      item->o.c_str(),
+                      item->tx,
+                      item->updated,
+                      item->uuid.c_str(),
+                      item->category.c_str(),
+                      item->d.c_str(),
+                      item->fave,
+                      item->folder.c_str(),
+                      item->hmac.c_str(),
+                      item->k.c_str(),
+                      item->trashed) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
     snprintf(buf, (size_t) sz, SQL_REPLACE_ITEM,
-             item.created,
-             item.o.c_str(),
-             item.tx,
-             item.updated,
-             item.uuid.c_str(),
-             item.category.c_str(),
-             item.d.c_str(),
-             item.fave,
-             item.folder.c_str(),
-             item.hmac.c_str(),
-             item.k.c_str(),
-             item.trashed);
+             item->created,
+             item->o.c_str(),
+             item->tx,
+             item->updated,
+             item->uuid.c_str(),
+             item->category.c_str(),
+             item->d.c_str(),
+             item->fave,
+             item->folder.c_str(),
+             item->hmac.c_str(),
+             item->k.c_str(),
+             item->trashed);
 
-    DBGVAR(item.uuid);
+    DBGVAR(item->uuid);
 
     sql_exec(buf);
     free(buf);
@@ -100,10 +101,10 @@ void Band::insert_items(std::vector<BandItem> &items) {
     for(auto it=items.begin(); it!=items.end(); ++it) {
         if (it->updateState) {
             it->generate_hmac();
-            insert_item(*it);
+            insert_item(&*it);
             it->updateState = false;
         } else {
-            insert_item(*it);
+            insert_item(&*it);
         }
     }
 }
@@ -180,30 +181,19 @@ void Band::sync(std::vector<BandItem> &items) {
     }
 }
 
-BandItem Band::json2item(json &j) {
-    return BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
-                    j["o"].is_string() ? j["o"].get<std::string>() : "NULL",
-                    j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
-                    j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
-                    j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
-                    j["category"].is_string() ? j["category"].get<std::string>() : "NULL",
-                    j["d"].is_string() ? j["d"].get<std::string>() : "NULL",
-                    j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
-                    j["folder"].is_string() ? j["folder"].get<std::string>() : "NULL",
-                    j["hmac"].is_string() ? j["hmac"].get<std::string>() : "NULL",
-                    j["k"].is_string() ? j["k"].get<std::string>() : "NULL",
-                    j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
-}
-
-void Band::insert_json(nlohmann::json &j) {
-    BandItem item;
-    try {
-        item = json2item(j);
-    }
-    catch (...) {
-        throw;
-    }
-    insert_item(item);
+BaseItem* Band::json2item(json &j) {
+  return new BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+                      j["o"].is_string() ? j["o"].get<std::string>() : "NULL",
+                      j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+                      j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+                      j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
+                      j["category"].is_string() ? j["category"].get<std::string>() : "NULL",
+                      j["d"].is_string() ? j["d"].get<std::string>() : "NULL",
+                      j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
+                      j["folder"].is_string() ? j["folder"].get<std::string>() : "NULL",
+                      j["hmac"].is_string() ? j["hmac"].get<std::string>() : "NULL",
+                      j["k"].is_string() ? j["k"].get<std::string>() : "NULL",
+                      j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
 }
 
 }

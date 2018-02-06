@@ -37,10 +37,9 @@ class Profile : public File
 public:
     Profile() {}
 
-private:
-    static ProfileItem json2item(nlohmann::json &j);
-    void insert_json(nlohmann::json &j);
-    void insert_item(ProfileItem profile);
+protected:
+    virtual BaseItem* json2item(nlohmann::json &j);
+    virtual void insert_item(BaseItem* base_item);
 
 public:
     void read();
