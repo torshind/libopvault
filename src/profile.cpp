@@ -93,16 +93,16 @@ void Profile::insert_item(ProfileItem profile) {
 }
 
 ProfileItem Profile::json2item(nlohmann::json &j) {
-    return ProfileItem( j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "NULL",
-                        j["updatedAt"].is_number_integer() ? j["updatedAt"].get<long>() : -1,
-                        j["profileName"].is_string() ? j["profileName"].get<std::string>() : "NULL",
-                        j["salt"].is_string() ? j["salt"].get<std::string>() : "NULL",
-                        j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "NULL",
-                        j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "NULL",
-                        j["iterations"].is_number_integer() ? j["iterations"].get<unsigned int>() : 0,
-                        j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
-                        j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "NULL",
-                        j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1 );
+    return ProfileItem(j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "NULL",
+                       j["updatedAt"].is_number_integer() ? j["updatedAt"].get<long>() : -1,
+                       j["profileName"].is_string() ? j["profileName"].get<std::string>() : "NULL",
+                       j["salt"].is_string() ? j["salt"].get<std::string>() : "NULL",
+                       j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "NULL",
+                       j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "NULL",
+                       j["iterations"].is_number_integer() ? j["iterations"].get<unsigned int>() : 0,
+                       j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
+                       j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "NULL",
+                       j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1);
 }
 
 void Profile::insert_json(nlohmann::json &j) {

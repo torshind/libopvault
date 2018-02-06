@@ -83,11 +83,11 @@ void Folder::insert_all_entries(std::vector<FolderItem> &folders) {
 }
 
 FolderItem Folder::json2item(nlohmann::json &j) {
-    return FolderItem( j["created"].is_number_integer() ? j["created"].get<long>() : -1,
-                       j["overview"].is_string() ? j["overview"].get<std::string>() : "NULL",
-                       j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
-                       j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
-                       j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL" );
+    return FolderItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+                      j["overview"].is_string() ? j["overview"].get<std::string>() : "NULL",
+                      j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+                      j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+                      j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL");
 }
 
 void Folder::insert_json(nlohmann::json &j) {
