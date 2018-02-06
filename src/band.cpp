@@ -35,10 +35,12 @@ using json = nlohmann::json;
 namespace OPVault {
 
 void Band::read() {
+    nlohmann::json j;
     int exept_count = 0;
+
     for (int index=0; index<BAND_NUM; ++index) {
         try {
-            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
+            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"), j);
         }
         catch (...) {
             exept_count++;
@@ -48,7 +50,7 @@ void Band::read() {
             }
             continue;
         }
-        for(auto it=data.begin(); it!=data.end(); ++it) {
+        for(auto it=j.begin(); it!=j.end(); ++it) {
             insert_json(*it);
         }
     }
@@ -107,6 +109,7 @@ void Band::insert_items(std::vector<BandItem> &items) {
 }
 
 void Band::sync(std::vector<BandItem> &items) {
+    nlohmann::json j;
     std::unordered_map<std::string, BandItem*> local_map;
 
     for (auto it=items.begin(); it!=items.end(); ++it) {
@@ -117,7 +120,7 @@ void Band::sync(std::vector<BandItem> &items) {
     int exept_count = 0;
     for (int index=0; index<BAND_NUM; ++index) {
         try {
-            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
+            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"), j);
         }
         catch (...) {
             exept_count++;
@@ -127,7 +130,7 @@ void Band::sync(std::vector<BandItem> &items) {
             }
             continue;
         }
-        for(auto it=data.begin(); it!=data.end(); ++it) {
+        for(auto it=j.begin(); it!=j.end(); ++it) {
             // Find uuid in local map
             std::string uuid = (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL";
 

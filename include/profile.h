@@ -38,13 +38,14 @@ public:
     Profile() {}
 
 private:
-    ProfileItem profile;
+    static ProfileItem json2item(nlohmann::json &j);
+    void insert_json(nlohmann::json &j);
+    void insert_item(ProfileItem profile);
 
 public:
     void read();
-    int read_updatedAt();
     void create_table();
-    void insert_entry();
+    int read_updatedAt();
 };
 
 }

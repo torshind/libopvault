@@ -39,13 +39,13 @@ protected:
     Folder() {}
 
 private:
-    std::vector<FolderItem> folders;
+    static FolderItem json2item(nlohmann::json &j);
+    void insert_json(nlohmann::json &j);
+    void insert_item(FolderItem &folder);
 
 public:
     void read();
     void create_table();
-    void insert_entry(FolderItem &folder);
-    void insert_all_entries();
     void insert_all_entries(std::vector<FolderItem> &folders);
 };
 

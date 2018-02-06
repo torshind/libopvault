@@ -40,9 +40,7 @@ protected:
 
     static std::string directory;
 
-    nlohmann::json data;
-
-    void read(const std::string &filename);
+    void read(const std::string &filename, nlohmann::json &j);
     void sql_exec(const char sql[]);
 
 public:

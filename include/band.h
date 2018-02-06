@@ -41,11 +41,11 @@ protected:
 private:
     static BandItem json2item(nlohmann::json &j);
     void insert_json(nlohmann::json &j);
+    void insert_item(BandItem &item);
 
 public:
     void read();
     void create_table();
-    void insert_item(BandItem &item);
     void insert_items(std::vector<BandItem> &items);
     void sync(std::vector<BandItem> &items);
 };

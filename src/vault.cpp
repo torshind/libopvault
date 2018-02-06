@@ -214,14 +214,13 @@ void Vault::get_items_query(const char query[], std::vector<BandItem> &items) co
 void Vault::create_db(const std::string &cloud_data_dir) {
     Profile pro;
     pro.set_directory(cloud_data_dir);
+    pro.create_table();
     try {
         pro.read();
     }
     catch (...) {
         throw;
     }
-    pro.create_table();
-    pro.insert_entry();
 
     Folder folders;
     folders.create_table();
@@ -231,7 +230,6 @@ void Vault::create_db(const std::string &cloud_data_dir) {
     catch (...) {
         throw;
     }
-    folders.insert_all_entries();
 
     Band band;
     band.create_table();

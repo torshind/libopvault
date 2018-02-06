@@ -43,7 +43,7 @@ namespace OPVault {
 
 std::string File::directory;
 
-void File::read(const std::string &filename) {
+void File::read(const std::string &filename, nlohmann::json &j) {
     std::ifstream ifs(directory + "/" + filename);
     std::string file_string;
     std::ostringstream oss;
@@ -69,14 +69,14 @@ void File::read(const std::string &filename) {
     }
 
     try {
-        data = json::parse(file_string);
+        j = json::parse(file_string);
     }
     catch (...) {
         throw;
     }
 
 #ifndef NDEBUG
-    for (auto it = data.begin(); it != data.end(); ++it) {
+    for (auto it = j.begin(); it != j.end(); ++it) {
         DBGMSG(it.key() << " : " << it.value());
     }
 #endif

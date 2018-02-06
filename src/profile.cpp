@@ -33,39 +33,34 @@ using json = nlohmann::json;
 namespace OPVault {
 
 void Profile::read() {
+    nlohmann::json j;
+
     try {
-        File::read("profile.js");
+        File::read("profile.js", j);
     }
     catch (...) {
         throw;
     }
-    profile = ProfileItem( data["lastUpdatedBy"].is_string() ? data["lastUpdatedBy"].get<std::string>() : "NULL",
-                           data["updatedAt"].is_number_integer() ? data["updatedAt"].get<long>() : -1,
-                           data["profileName"].is_string() ? data["profileName"].get<std::string>() : "NULL",
-                           data["salt"].is_string() ? data["salt"].get<std::string>() : "NULL",
-                           data["passwordHint"].is_string() ? data["passwordHint"].get<std::string>() : "NULL",
-                           data["masterKey"].is_string() ? data["masterKey"].get<std::string>() : "NULL",
-                           data["iterations"].is_number_integer() ? data["iterations"].get<unsigned int>() : 0,
-                           data["uuid"].is_string() ? data["uuid"].get<std::string>() : "NULL",
-                           data["overviewKey"].is_string() ? data["overviewKey"].get<std::string>() : "NULL",
-                           data["createdAt"].is_number_integer() ? data["createdAt"].get<long>() : -1 );
+    insert_json(j);
 }
 
 int Profile::read_updatedAt() {
+    nlohmann::json j;
+
     try {
-        File::read("profile.js");
+        File::read("profile.js", j);
     }
     catch (...) {
         throw;
     }
-    return data["updatedAt"];
+    return j["updatedAt"];
 }
 
 void Profile::create_table() {
     sql_exec(SQL_CREATE_PROFILE);
 }
 
-void Profile::insert_entry() {
+void Profile::insert_item(ProfileItem profile) {
     int sz = snprintf(nullptr, 0, SQL_INSERT_PROFILE_ITEM,
                       profile.lastUpdatedBy.c_str(),
                       profile.updatedAt,
@@ -95,6 +90,30 @@ void Profile::insert_entry() {
 
     sql_exec(buf);
     free(buf);
+}
+
+ProfileItem Profile::json2item(nlohmann::json &j) {
+    return ProfileItem( j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "NULL",
+                        j["updatedAt"].is_number_integer() ? j["updatedAt"].get<long>() : -1,
+                        j["profileName"].is_string() ? j["profileName"].get<std::string>() : "NULL",
+                        j["salt"].is_string() ? j["salt"].get<std::string>() : "NULL",
+                        j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "NULL",
+                        j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "NULL",
+                        j["iterations"].is_number_integer() ? j["iterations"].get<unsigned int>() : 0,
+                        j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
+                        j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "NULL",
+                        j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1 );
+}
+
+void Profile::insert_json(nlohmann::json &j) {
+    ProfileItem item;
+    try {
+        item = json2item(j);
+    }
+    catch (...) {
+        throw;
+    }
+    insert_item(item);
 }
 
 }
