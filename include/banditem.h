@@ -39,7 +39,7 @@ class BandItem : public UserItem {
 public:
     BandItem() {
         fave = 0;
-        folder = "NULL";
+        folder = "";
         trashed = -1;
         updateState = false;
     }

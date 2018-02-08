@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 #include <iostream>
+#include <experimental/filesystem>
 
 #include "vault.h"
 #include "profile.h"
@@ -169,7 +170,7 @@ int main(int argc, char *argv[])
         FolderItem folder;
         folder.set_overview("{\"title\":\"Mordor\"}");
         folders.push_back(folder);
-        vault.set_folders(folders);
+        vault.insert_folders(folders);
 
         // CHECK NEW DATA
         get_folders(vault);
@@ -201,13 +202,33 @@ int main(int argc, char *argv[])
         get_items(vault);
     }
 
+    std::experimental::filesystem::copy(cloud_data_dir, cloud_sync_test_data_dir, std::experimental::filesystem::copy_options::recursive);
+
     {
-        // OPEN VAULT
+        // SYNC TEST
         Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
     }
 
     // RESET LOCAL DB
     remove("./opvault.db");
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
+    // RESET SYNCED DATA
+    std::experimental::filesystem::remove_all(cloud_sync_test_data_dir);
 
     return 0;
 }

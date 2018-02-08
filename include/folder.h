@@ -44,7 +44,7 @@ protected:
 public:
     void read();
     void create_table();
-    void insert_all_entries(std::vector<FolderItem> &folders);
+    void insert_folders(std::vector<FolderItem> &folders);
 };
 
 }

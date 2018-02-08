@@ -49,7 +49,7 @@ private:
 
 public:
     void get_folders(std::vector<FolderItem> &folders) const;
-    void set_folders(std::vector<FolderItem> &folders);
+    void insert_folders(std::vector<FolderItem> &folders);
     void get_items(std::vector<BandItem> &items) const;
     void insert_items(std::vector<BandItem> &items);
     void get_items_folder(const std::string &folder, std::vector<BandItem> &items) const;

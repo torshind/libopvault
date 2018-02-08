@@ -23,9 +23,11 @@ protected:
         uuid(_uuid)
     {}
 
-    virtual void init();
-
     virtual ~UserItem() {}
+
+    virtual void init();
+    void setup_update();
+
 
 public:
     std::string& get_overview() { return o; }
@@ -33,7 +35,7 @@ public:
 
     void set_overview(const std::string &_o);
 
-    void decrypt_overview(std::string& overview);
+    void decrypt_overview(std::string &overview);
 
 protected:
     long created;

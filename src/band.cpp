@@ -133,7 +133,7 @@ void Band::sync(std::vector<BandItem> &items) {
         }
         for(auto it=j.begin(); it!=j.end(); ++it) {
             // Find uuid in local map
-            std::string uuid = (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL";
+            std::string uuid = (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "";
 
             auto found = local_map.find(uuid);
             if (found != local_map.end()) {
@@ -155,19 +155,16 @@ void Band::sync(std::vector<BandItem> &items) {
                         DBGMSG("merge local & remote changes");
                     } else {
                         DBGMSG("sync remote with local item");
-                        // Remove from map
-                        local_map.erase(found->first);
                     }
                 } else {
                     // Check for remote changes: remote.tx > local.tx
                     if (tx > found->second->tx) {
                         DBGMSG("sync local with remote item");
                         insert_json(*it);
-
-                        // Remove from map
-                        local_map.erase(found->first);
                     }
                 }
+                // Remove from map
+                local_map.erase(found->first);
             } else {
                 // New remote item: insert in db
                 DBGMSG("new remote item");
@@ -177,23 +174,56 @@ void Band::sync(std::vector<BandItem> &items) {
     }
     // New local items: sync new elements still in the map
     if (!local_map.empty()) {
-        DBGMSG("new local item");
+        for (auto it : local_map) {
+            DBGMSG("new local item");
+            // update tx and hmac in db
+            it.second->tx = time(nullptr);
+            it.second->generate_hmac();
+            insert_item(it.second);
+
+            // append new element to file
+            json j;
+            item2json(it.second, j);
+            append(std::string("band_") + it.second->uuid[0] + std::string(".js"), j);
+        }
     }
 }
 
 BaseItem* Band::json2item(json &j) {
-  return new BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
-                      j["o"].is_string() ? j["o"].get<std::string>() : "NULL",
-                      j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
-                      j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
-                      j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
-                      j["category"].is_string() ? j["category"].get<std::string>() : "NULL",
-                      j["d"].is_string() ? j["d"].get<std::string>() : "NULL",
-                      j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
-                      j["folder"].is_string() ? j["folder"].get<std::string>() : "NULL",
-                      j["hmac"].is_string() ? j["hmac"].get<std::string>() : "NULL",
-                      j["k"].is_string() ? j["k"].get<std::string>() : "NULL",
-                      j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
+    return new BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+                        j["o"].is_string() ? j["o"].get<std::string>() : "",
+                        j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+                        j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+                        j["uuid"].is_string() ? j["uuid"].get<std::string>() : "",
+                        j["category"].is_string() ? j["category"].get<std::string>() : "",
+                        j["d"].is_string() ? j["d"].get<std::string>() : "",
+                        j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
+                        j["folder"].is_string() ? j["folder"].get<std::string>() : "",
+                        j["hmac"].is_string() ? j["hmac"].get<std::string>() : "",
+                        j["k"].is_string() ? j["k"].get<std::string>() : "",
+                        j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
+}
+
+void Band::item2json(BandItem* item, json &j) {
+    json j_item;
+    j_item["created"]  = item->created;
+    j_item["o"]        = item->o;
+    j_item["tx"]       = item->tx;
+    j_item["updated"]  = item->updated;
+    j_item["uuid"]     = item->uuid;
+    j_item["category"] = item->category;
+    j_item["d"]        = item->d;
+    j_item["fave"]     = item->fave;
+    j_item["folder"]   = item->folder;
+    j_item["hmac"]     = item->hmac;
+    j_item["k"]        = item->k;
+    if (item->trashed == 0) {
+        j_item["trashed"] = false;
+    } else if (item->trashed == 1) {
+        j_item["trashed"] = true;
+    }
+
+    j[item->uuid] = j_item;
 }
 
 }

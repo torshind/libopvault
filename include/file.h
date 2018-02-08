@@ -43,7 +43,10 @@ protected:
     static std::string directory;
 
     void read(const std::string &filename, nlohmann::json &j);
+    void append(const std::string &filename, nlohmann::json &j);
+
     void sql_exec(const char sql[]);
+    void sql_update_long(const std::string &table, const std::string &col, std::string &uuid, long val);
 
     void insert_json(nlohmann::json &j);
     virtual BaseItem* json2item(nlohmann::json &j) = 0;

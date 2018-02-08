@@ -158,9 +158,9 @@ void Vault::get_folders(std::vector<FolderItem> &folders) const {
     sqlite3_close(db);
 }
 
-void Vault::set_folders(std::vector<FolderItem> &folders) {
+void Vault::insert_folders(std::vector<FolderItem> &folders) {
     Folder folder;
-    folder.insert_all_entries(folders);
+    folder.insert_folders(folders);
 }
 
 void Vault::get_items_query(const char query[], std::vector<BandItem> &items) const {

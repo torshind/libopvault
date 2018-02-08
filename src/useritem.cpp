@@ -52,12 +52,16 @@ void UserItem::init() {
     uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
 }
 
-void UserItem::set_overview(const std::string &_o) {
+void UserItem::setup_update() {
     updated = time(nullptr);
     updateState = true;
     if (uuid.empty()) {
         init();
     }
+}
+
+void UserItem::set_overview(const std::string &_o) {
+    setup_update();
 
     SecByteBlock iv;
 

@@ -126,7 +126,7 @@ void BaseItem::encrypt_opdata(const std::string &plaintext, const SecByteBlock &
     StringSource(opdata, true, new HashFilter(hmac, new StringSink(mac)));
 
     // Base64 encoding
-    StringSource(opdata + mac, true, new Base64Encoder(new StringSink(encoded_opdata)));
+    StringSource(opdata + mac, true, new Base64Encoder(new StringSink(encoded_opdata), false));
 
     delete[] padding;
 }

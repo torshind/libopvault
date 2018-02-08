@@ -94,15 +94,15 @@ void Profile::insert_item(BaseItem* base_item) {
 }
 
 BaseItem* Profile::json2item(nlohmann::json &j) {
-    return new ProfileItem(j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "NULL",
+    return new ProfileItem(j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "",
                            j["updatedAt"].is_number_integer() ? j["updatedAt"].get<long>() : -1,
-                           j["profileName"].is_string() ? j["profileName"].get<std::string>() : "NULL",
-                           j["salt"].is_string() ? j["salt"].get<std::string>() : "NULL",
-                           j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "NULL",
-                           j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "NULL",
+                           j["profileName"].is_string() ? j["profileName"].get<std::string>() : "",
+                           j["salt"].is_string() ? j["salt"].get<std::string>() : "",
+                           j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "",
+                           j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "",
                            j["iterations"].is_number_integer() ? j["iterations"].get<unsigned int>() : 0,
-                           j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL",
-                           j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "NULL",
+                           j["uuid"].is_string() ? j["uuid"].get<std::string>() : "",
+                           j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "",
                            j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1);
 }
 

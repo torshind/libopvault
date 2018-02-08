@@ -75,7 +75,7 @@ std::string BandItem::hmac_in_str() {
                 "created" + std::to_string(created) +
                 "d" + d +
                 (fave == 0 ? "" : "fave" + std::to_string(fave)) +
-                (folder == "NULL" ? "" : "folder" + folder) +
+                (folder == "" ? "" : "folder" + folder) +
                 "k" + k +
                 "o" + o +
                 (trashed == -1 ? "" : "trashed" + std::to_string(trashed)) +
@@ -124,23 +124,17 @@ void BandItem::init() {
     StringSource(std::string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key, true, new HashFilter(_hmac, new StringSink(mac)));
 
     // Base64 encoding
-    StringSource(std::string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k)));
+    StringSource(std::string(reinterpret_cast<const char *> (iv.data()), AES::BLOCKSIZE) + encrypted_key + mac, true, new Base64Encoder(new StringSink(k), false));
 }
 
 void BandItem::set_category(const std::string &_category) {
+    setup_update();
+
     category = _category;
-    updateState = true;
-    if (uuid.empty()) {
-        init();
-    }
 }
 
 void BandItem::set_data(const std::string &_d) {
-    updated = time(nullptr);
-    updateState = true;
-    if (uuid.empty()) {
-        init();
-    }
+    setup_update();
 
     SecByteBlock item_key;
     SecByteBlock iv;
@@ -160,27 +154,21 @@ void BandItem::set_data(const std::string &_d) {
 }
 
 void BandItem::set_fave(const unsigned long _fave) {
+    setup_update();
+
     fave = _fave;
-    updateState = true;
-    if (uuid.empty()) {
-        init();
-    }
 }
 
 void BandItem::set_folder(const std::string &_folder) {
+    setup_update();
+
     folder = _folder;
-    updateState = true;
-    if (uuid.empty()) {
-        init();
-    }
 }
 
 void BandItem::set_trashed(const int _trashed) {
+    setup_update();
+
     trashed = _trashed;
-    updateState = true;
-    if (uuid.empty()) {
-        init();
-    }
 }
 
 void BandItem::generate_hmac() {
@@ -196,7 +184,7 @@ void BandItem::generate_hmac() {
     if (!hmac.empty()) {
         hmac.clear();
     }
-    StringSource(mac, true, new Base64Encoder(new StringSink(hmac)));
+    StringSource(mac, true, new Base64Encoder(new StringSink(hmac), false));
 }
 
 }

@@ -55,6 +55,10 @@ const int BAND_NUM = 16;
 const char BAND_INDEXES[BAND_NUM] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
 
 const char DBFILE[] = "opvault.db";
+
+const std::string SQL_TABLE_ITEMS("Items");
+const std::string SQL_TABLE_FOLDERS("Folders");
+
 const char SQL_CREATE_PROFILE[] = "CREATE TABLE Profile (" \
                                   "lastUpdatedBy TEXT NOT NULL," \
                                   "updatedAt     INT  NOT NULL," \
@@ -96,6 +100,8 @@ const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
 
 const char SQL_REPLACE_FOLDER[] = "INSERT OR REPLACE INTO Folders (created, o, tx, updated, uuid) " \
                                   "VALUES (%ld, '%s', %ld, %ld, '%s');";
+
+const char SQL_UPDATE_LONG[] = "UPDATE %s SET %s = %ld WHERE uuid = '%s';";
 
 const char SQL_SELECT_PROFILE[] = "SELECT * from Profile";
 const char SQL_SELECT_FOLDERS[] = "SELECT * from Folders";

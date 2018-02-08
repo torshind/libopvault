@@ -84,8 +84,37 @@ void File::read(const std::string &filename, nlohmann::json &j) {
         DBGMSG(it.key() << " : " << it.value());
     }
 #endif
+}
 
-    return;
+void File::append(const std::string &filename, nlohmann::json &j) {
+    std::fstream iofs(directory + "/" + filename, std::ios::in | std::ios::out | std::ios::binary);
+
+    if (iofs.is_open()) {
+        iofs.seekg(-1, std::ios::end);
+        while (iofs.get() != '}' && iofs.tellg() > 0) {
+            iofs.seekg(-2, std::ios::cur);
+        }
+        if (iofs.tellg() > 0) {
+            iofs.seekg(-1, std::ios::cur);
+            iofs.seekp(iofs.tellg());
+            iofs.seekg(-1, std::ios::cur);
+            if (iofs.get() != '{') {
+                iofs << ",";
+            }
+        } else {
+            iofs.clear();
+            iofs << "ld({";
+        }
+    }
+    else {
+        iofs.open(directory + "/" + filename, std::ios::out);
+        iofs << "ld({";
+    }
+    std::string json_string;
+    json_string = j.dump();
+    json_string.erase(0, 1).erase(json_string.end()-1, json_string.end());
+    iofs << json_string << "});";
+    iofs.close();
 }
 
 void File::sql_exec(const char sql[]) {
@@ -127,6 +156,27 @@ void File::insert_json(nlohmann::json &j) {
     }
     insert_item(item);
     delete item;
+}
+
+void File::sql_update_long(const std::string &table, const std::string &col, std::string &uuid, long val) {
+    int sz = snprintf(nullptr, 0, SQL_UPDATE_LONG,
+                      table.c_str(),
+                      col.c_str(),
+                      val,
+                      uuid.c_str()) + 1;
+    char *buf;
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_UPDATE_LONG,
+             table.c_str(),
+             col.c_str(),
+             val,
+             uuid.c_str());
+
+    DBGVAR(uuid);
+    DBGVAR(val);
+
+    sql_exec(buf);
+    free(buf);
 }
 
 }

@@ -46,6 +46,9 @@ public:
     void create_table();
     void insert_items(std::vector<BandItem> &items);
     void sync(std::vector<BandItem> &items);
+
+private:
+    void item2json(BandItem* item, nlohmann::json &j);
 };
 
 }

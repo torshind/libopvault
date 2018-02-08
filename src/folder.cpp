@@ -74,7 +74,7 @@ void Folder::insert_item(BaseItem* base_item) {
     free(buf);
 }
 
-void Folder::insert_all_entries(std::vector<FolderItem> &folders) {
+void Folder::insert_folders(std::vector<FolderItem> &folders) {
     for(auto it=folders.begin(); it!=folders.end(); ++it) {
         if (it->updateState) {
             insert_item(&*it);
@@ -85,10 +85,10 @@ void Folder::insert_all_entries(std::vector<FolderItem> &folders) {
 
 BaseItem* Folder::json2item(nlohmann::json &j) {
     return new FolderItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
-                          j["overview"].is_string() ? j["overview"].get<std::string>() : "NULL",
+                          j["overview"].is_string() ? j["overview"].get<std::string>() : "",
                           j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
                           j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
-                          j["uuid"].is_string() ? j["uuid"].get<std::string>() : "NULL");
+                          j["uuid"].is_string() ? j["uuid"].get<std::string>() : "");
 }
 
 }
