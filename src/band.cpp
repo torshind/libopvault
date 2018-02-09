@@ -112,6 +112,7 @@ void Band::insert_items(std::vector<BandItem> &items) {
 void Band::sync(std::vector<BandItem> &items) {
     nlohmann::json j;
     std::unordered_map<std::string, BandItem*> local_map;
+    bool json_is_updated = false;
 
     for (auto it=items.begin(); it!=items.end(); ++it) {
         // Create a map with key uuid for local items
@@ -138,27 +139,52 @@ void Band::sync(std::vector<BandItem> &items) {
             auto found = local_map.find(uuid);
             if (found != local_map.end()) {
                 // Get remote tx
-                long tx;
+                long remote_tx;
                 try {
-                    tx = (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1;
+                    remote_tx = (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1;
                 }
                 catch (...) {
                     throw;
                 }
-                DBGVAR(tx);
+                DBGVAR(remote_tx);
 
                 // Check for local changes: local.updated > local.tx
                 DBGVAR(found->second->updated);
                 DBGVAR(found->second->tx);
                 if (found->second->updated > found->second->tx) {
-                    if (tx > found->second->tx) {
+                    if (remote_tx > found->second->tx) {
+                        // merge: keep most recent one
                         DBGMSG("merge local & remote changes");
+                        long remote_updated;
+                        try {
+                            remote_updated = (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1;
+                        }
+                        catch (...) {
+                            throw;
+                        }
+                        DBGVAR(remote_updated);
+                        if (remote_updated > found->second->updated) {
+                            DBGMSG("sync local with remote item");
+                            insert_json(*it);
+                        } else {
+                            DBGMSG("sync remote with local item");
+                            if (!json_is_updated) {
+                                json_is_updated = true;
+                            }
+                            update_tx(found->second);
+                            item2json(found->second, j);
+                        }
                     } else {
                         DBGMSG("sync remote with local item");
+                        if (!json_is_updated) {
+                            json_is_updated = true;
+                        }
+                        update_tx(found->second);
+                        item2json(found->second, j);
                     }
                 } else {
                     // Check for remote changes: remote.tx > local.tx
-                    if (tx > found->second->tx) {
+                    if (remote_tx > found->second->tx) {
                         DBGMSG("sync local with remote item");
                         insert_json(*it);
                     }
@@ -171,16 +197,16 @@ void Band::sync(std::vector<BandItem> &items) {
                 insert_json(*it);
             }
         }
+        if (json_is_updated) {
+            DBGMSG("write band file");
+            File::write(std::string("band_") + BAND_INDEXES[index] + std::string(".js"), j);
+        }
     }
     // New local items: sync new elements still in the map
     if (!local_map.empty()) {
         for (auto it : local_map) {
             DBGMSG("new local item");
-            // update tx and hmac in db
-            it.second->tx = time(nullptr);
-            it.second->generate_hmac();
-            insert_item(it.second);
-
+            update_tx(it.second);
             // append new element to file
             json j;
             item2json(it.second, j);
@@ -224,6 +250,13 @@ void Band::item2json(BandItem* item, json &j) {
     }
 
     j[item->uuid] = j_item;
+}
+
+void Band::update_tx(BandItem* item) {
+    // update tx and hmac in db
+    item->tx = time(nullptr);
+    item->generate_hmac();
+    insert_item(item);
 }
 
 }

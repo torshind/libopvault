@@ -86,6 +86,23 @@ void File::read(const std::string &filename, nlohmann::json &j) {
 #endif
 }
 
+void File::write(const std::string &filename, nlohmann::json &j) {
+    std::ofstream ofs(directory + "/" + filename, std::ios::binary);
+
+    if (!ofs.is_open()) {
+        throw std::runtime_error(std::string("libopvault: unable to write file ") + directory + "/" + filename);
+    }
+
+    ofs << "ld({";
+
+    std::string json_string;
+    json_string = j.dump();
+    json_string.erase(0, 1).erase(json_string.end()-1, json_string.end());
+    ofs << json_string << "});";
+
+    ofs.close();
+}
+
 void File::append(const std::string &filename, nlohmann::json &j) {
     std::fstream iofs(directory + "/" + filename, std::ios::in | std::ios::out | std::ios::binary);
 
@@ -108,12 +125,16 @@ void File::append(const std::string &filename, nlohmann::json &j) {
     }
     else {
         iofs.open(directory + "/" + filename, std::ios::out);
+        if (!iofs.is_open()) {
+            throw std::runtime_error(std::string("libopvault: unable to write file ") + directory + "/" + filename);
+        }
         iofs << "ld({";
     }
     std::string json_string;
     json_string = j.dump();
     json_string.erase(0, 1).erase(json_string.end()-1, json_string.end());
     iofs << json_string << "});";
+
     iofs.close();
 }
 
@@ -158,7 +179,7 @@ void File::insert_json(nlohmann::json &j) {
     delete item;
 }
 
-void File::sql_update_long(const std::string &table, const std::string &col, std::string &uuid, long val) {
+void File::sql_update_long(const std::string &table, const std::string &col, const std::string &uuid, long val) {
     int sz = snprintf(nullptr, 0, SQL_UPDATE_LONG,
                       table.c_str(),
                       col.c_str(),

@@ -49,6 +49,7 @@ public:
 
 private:
     void item2json(BandItem* item, nlohmann::json &j);
+    void update_tx(BandItem* item);
 };
 
 }

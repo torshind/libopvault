@@ -91,7 +91,7 @@ void Vault::get_profile() {
             throw std::runtime_error(os.str());
         }
         profile.lastUpdatedBy = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        profile.updatedAt = sqlite3_column_int(stmt, 1);
+        profile.updatedAt = sqlite3_column_int64(stmt, 1);
         profile.profileName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         profile.salt = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
         profile.passwordHint = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
@@ -99,7 +99,7 @@ void Vault::get_profile() {
         profile.iterations = (unsigned int) sqlite3_column_int(stmt, 6);
         profile.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
         profile.overviewKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
-        profile.createdAt = sqlite3_column_int(stmt, 9);
+        profile.createdAt = sqlite3_column_int64(stmt, 9);
 
         sqlite3_finalize(stmt);
     }
@@ -145,10 +145,10 @@ void Vault::get_folders(std::vector<FolderItem> &folders) const {
                 throw std::runtime_error(os.str());
             }
             FolderItem folder;
-            folder.created = sqlite3_column_int(stmt, 0);
+            folder.created = sqlite3_column_int64(stmt, 0);
             folder.o = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            folder.tx = sqlite3_column_int(stmt, 2);
-            folder.updated = sqlite3_column_int(stmt, 3);
+            folder.tx = sqlite3_column_int64(stmt, 2);
+            folder.updated = sqlite3_column_int64(stmt, 3);
             folder.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
             folders.push_back(folder);
         }
@@ -191,14 +191,14 @@ void Vault::get_items_query(const char query[], std::vector<BandItem> &items) co
                 throw std::runtime_error(os.str());
             }
             BandItem item;
-            item.created = sqlite3_column_int(stmt, 0);
+            item.created = sqlite3_column_int64(stmt, 0);
             item.o = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            item.tx = sqlite3_column_int(stmt, 2);
-            item.updated = sqlite3_column_int(stmt, 3);
+            item.tx = sqlite3_column_int64(stmt, 2);
+            item.updated = sqlite3_column_int64(stmt, 3);
             item.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
             item.category = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
             item.d = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-            item.fave = (unsigned long) sqlite3_column_int(stmt, 7);
+            item.fave = (unsigned long) sqlite3_column_int64(stmt, 7);
             item.folder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
             item.hmac = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
             item.k = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10));

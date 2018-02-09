@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <iostream>
 #include <experimental/filesystem>
+#include <sqlite3.h>
 
 #include "vault.h"
 #include "profile.h"
@@ -32,8 +33,56 @@ SOFTWARE.
 #include "band.h"
 #include "baseitem.h"
 
+
+const char SQL_UPDATE_LONG_ALL[] = "UPDATE %s SET %s = %ld;";
+
 using namespace std;
 using namespace OPVault;
+
+void sql_exec(const char sql[]) {
+    sqlite3 *db;
+    char *zErrMsg = nullptr;
+    int rc;
+
+    rc = sqlite3_open(DBFILE, &db);
+
+    if(rc){
+        std::ostringstream os;
+        os << "Can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    rc = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
+
+    if(rc != SQLITE_OK){
+        std::ostringstream os;
+        os << "SQL error: " << zErrMsg << " - error code: " << rc;
+        sqlite3_free(zErrMsg);
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    sqlite3_free(zErrMsg);
+    sqlite3_close(db);
+
+}
+
+void sql_update_long(const std::string &table, const std::string &col, long val) {
+    int sz = snprintf(nullptr, 0, SQL_UPDATE_LONG_ALL,
+                      table.c_str(),
+                      col.c_str(),
+                      val) + 1;
+    char *buf;
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_UPDATE_LONG_ALL,
+             table.c_str(),
+             col.c_str(),
+             val);
+
+    sql_exec(buf);
+    free(buf);
+}
 
 static void get_items(const Vault &vault) {
     vector<BandItem> items;
@@ -206,6 +255,54 @@ int main(int argc, char *argv[])
 
     {
         // SYNC TEST
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET UPDATED TO FUTURE TO FORCE UPDATE TO CLOUD
+    sql_update_long("Items", "updated", LONG_MAX);
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET TX TO 0 TO FORCE MERGE FROM CLOUD
+    sql_update_long("Items", "tx", 0);
+
+    {
+        // OPEN SYNCED VAULT
         Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
 
         // CHECK SYNCED DATA
