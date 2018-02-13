@@ -55,6 +55,9 @@ protected:
 
 public:
     void set_directory(const std::string &d) { directory = d; }
+
+private:
+    std::string get_prefix(const std::string &filename);
 };
 
 }

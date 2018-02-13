@@ -276,6 +276,7 @@ int main(int argc, char *argv[])
 
     // RESET UPDATED TO FUTURE TO FORCE UPDATE TO CLOUD
     sql_update_long("Items", "updated", LONG_MAX);
+    sql_update_long("Folders", "updated", LONG_MAX);
 
     {
         // OPEN SYNCED VAULT
@@ -300,6 +301,7 @@ int main(int argc, char *argv[])
 
     // RESET TX TO 0 TO FORCE MERGE FROM CLOUD
     sql_update_long("Items", "tx", 0);
+    sql_update_long("Folders", "tx", 0);
 
     {
         // OPEN SYNCED VAULT

@@ -94,7 +94,7 @@ private:
     std::string k;
     int trashed;
 
-    std::string hmac_in_str();
+    std::string get_hmac_input_str();
     void verify();
     void verify_key();
     void decrypt_key(CryptoPP::SecByteBlock &key);

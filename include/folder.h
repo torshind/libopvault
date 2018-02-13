@@ -45,6 +45,11 @@ public:
     void read();
     void create_table();
     void insert_folders(std::vector<FolderItem> &folders);
+    void sync(std::vector<FolderItem> &folders);
+
+private:
+    void folder2json(FolderItem* folder, nlohmann::json &j);
+    void update_tx(FolderItem* folder);
 };
 
 }

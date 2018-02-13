@@ -93,7 +93,12 @@ void File::write(const std::string &filename, nlohmann::json &j) {
         throw std::runtime_error(std::string("libopvault: unable to write file ") + directory + "/" + filename);
     }
 
-    ofs << "ld({";
+    try {
+        ofs << get_prefix(filename);
+    }
+    catch (...) {
+        throw;
+    }
 
     std::string json_string;
     json_string = j.dump();
@@ -120,7 +125,12 @@ void File::append(const std::string &filename, nlohmann::json &j) {
             }
         } else {
             iofs.clear();
-            iofs << "ld({";
+            try {
+                iofs << get_prefix(filename);
+            }
+            catch (...) {
+                throw;
+            }
         }
     }
     else {
@@ -128,7 +138,12 @@ void File::append(const std::string &filename, nlohmann::json &j) {
         if (!iofs.is_open()) {
             throw std::runtime_error(std::string("libopvault: unable to write file ") + directory + "/" + filename);
         }
-        iofs << "ld({";
+        try {
+            iofs << get_prefix(filename);
+        }
+        catch (...) {
+            throw;
+        }
     }
     std::string json_string;
     json_string = j.dump();
@@ -177,6 +192,16 @@ void File::insert_json(nlohmann::json &j) {
     }
     insert_item(item);
     delete item;
+}
+
+std::string File::get_prefix(const std::string &filename) {
+    if (filename.find("band_") != std::string::npos) {
+        return "ld({";
+    } else if (filename.compare("folders.js") == 0) {
+        return "loadFolders({";
+    } else {
+        throw std::runtime_error("libopvault: Unknown file type error");
+    }
 }
 
 void File::sql_update_long(const std::string &table, const std::string &col, const std::string &uuid, long val) {

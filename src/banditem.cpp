@@ -69,7 +69,7 @@ void BandItem::decrypt_data(std::string& data) {
     }
 }
 
-std::string BandItem::hmac_in_str() {
+std::string BandItem::get_hmac_input_str() {
     return std::string(
                 "category" + category +
                 "created" + std::to_string(created) +
@@ -91,7 +91,7 @@ void BandItem::verify() {
 
     HMAC<SHA256> _hmac(overview_key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 
-    input = hmac_in_str() + input;
+    input = get_hmac_input_str() + input;
 
     const int flags = HashVerificationFilter::THROW_EXCEPTION | HashVerificationFilter::HASH_AT_END;
 
@@ -174,7 +174,7 @@ void BandItem::set_trashed(const int _trashed) {
 void BandItem::generate_hmac() {
     // HMAC
     std::string mac;
-    std::string input = hmac_in_str();
+    std::string input = get_hmac_input_str();
 
     HMAC<SHA256> _hmac(overview_key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
 

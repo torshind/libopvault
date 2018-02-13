@@ -222,10 +222,10 @@ void Vault::create_db(const std::string &cloud_data_dir) {
         throw;
     }
 
-    Folder folders;
-    folders.create_table();
+    Folder folder;
+    folder.create_table();
     try {
-        folders.read();
+        folder.read();
     }
     catch (...) {
         throw;
@@ -271,9 +271,11 @@ void Vault::get_items_category(const std::string &category, std::vector<BandItem
 }
 
 void Vault::sync() {
-    Folder folders;
+    Folder folder;
     try {
-//        folders.sync();
+        std::vector<FolderItem> folders;
+        get_folders(folders);
+        folder.sync(folders);
     }
     catch (...) {
         throw;
