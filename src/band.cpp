@@ -35,24 +35,15 @@ using json = nlohmann::json;
 namespace OPVault {
 
 void Band::read() {
-    nlohmann::json j;
-    int exept_count = 0;
+    std::vector<std::string> filenames;
+    for (int index = 0; index < BAND_NUM; ++index) {
+        filenames.push_back(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
+    }
 
-    for (int index=0; index<BAND_NUM; ++index) {
-        try {
-            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"), j);
-        }
-        catch (...) {
-            exept_count++;
-            if (exept_count == BAND_NUM)
-            {
-                throw;
-            }
-            continue;
-        }
-        for(auto it=j.begin(); it!=j.end(); ++it) {
-            insert_json(*it);
-        }
+    try {
+        File::read(filenames);
+    } catch (...) {
+        throw;
     }
 }
 
@@ -98,13 +89,13 @@ void Band::insert_item(BaseItem* base_item) {
 }
 
 void Band::insert_items(std::vector<BandItem> &items) {
-    for(auto it=items.begin(); it!=items.end(); ++it) {
-        if (it->updateState) {
-            it->generate_hmac();
-            insert_item(&*it);
-            it->updateState = false;
+    for(auto it : items) {
+        if (it.updateState) {
+            it.generate_hmac();
+            insert_item(&it);
+            it.updateState = false;
         } else {
-            insert_item(&*it);
+            insert_item(&it);
         }
     }
 }

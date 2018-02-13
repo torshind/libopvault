@@ -43,6 +43,8 @@ protected:
     static std::string directory;
 
     void read(const std::string &filename, nlohmann::json &j);
+    void read(const std::string &filename);
+    void read(const std::vector<std::string> &filenames);
     void write(const std::string &filename, nlohmann::json &j);
     void append(const std::string &filename, nlohmann::json &j);
 

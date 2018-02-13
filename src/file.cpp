@@ -86,6 +86,38 @@ void File::read(const std::string &filename, nlohmann::json &j) {
 #endif
 }
 
+void File::read(const std::string &filename) {
+    nlohmann::json j;
+
+    try {
+        read(filename, j);
+    }
+    catch (...) {
+        throw;
+    }
+
+    for(auto it : j) {
+        insert_json(it);
+    }
+}
+
+void File::read(const std::vector<std::string> &filenames) {
+    size_t exept_count = 0;
+
+    for (auto it : filenames) {
+        try {
+            read(it);
+        }
+        catch (...) {
+            exept_count++;
+            if (exept_count == filenames.size()) {
+                throw;
+            }
+            continue;
+        }
+    }
+}
+
 void File::write(const std::string &filename, nlohmann::json &j) {
     std::ofstream ofs(directory + "/" + filename, std::ios::binary);
 

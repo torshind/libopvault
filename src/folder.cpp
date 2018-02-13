@@ -34,17 +34,11 @@ using json = nlohmann::json;
 namespace OPVault {
 
 void Folder::read() {
-    nlohmann::json j;
-
     try {
-        File::read("folders.js", j);
-    }
-    catch (...) {
+        File::read("folders.js");
+    } catch (...) {
         throw;
     }
-
-    for(auto it = j.begin(); it !=j.end(); ++it) {
-        insert_json(*it);    }
 }
 
 void Folder::create_table() {
@@ -75,10 +69,10 @@ void Folder::insert_item(BaseItem* base_item) {
 }
 
 void Folder::insert_folders(std::vector<FolderItem> &folders) {
-    for(auto it=folders.begin(); it!=folders.end(); ++it) {
-        if (it->updateState) {
-            insert_item(&*it);
-            it->updateState = false;
+    for(auto it : folders) {
+        if (it.updateState) {
+            insert_item(&it);
+            it.updateState = false;
         }
     }
 }
