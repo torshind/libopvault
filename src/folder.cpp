@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <sqlite3.h>
+
 #include "dbg.h"
 #include "const.h"
 #include "vault.h"
@@ -47,25 +49,43 @@ void Folder::create_table() {
 
 void Folder::insert_item(BaseItem* base_item) {
     FolderItem* folder = static_cast<FolderItem*>(base_item);
-    int sz = snprintf(nullptr, 0, SQL_REPLACE_FOLDER,
-                      folder->created,
-                      folder->o.c_str(),
-                      folder->tx,
-                      folder->updated,
-                      folder->uuid.c_str()) + 1;
-    char *buf;
-    buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_REPLACE_FOLDER,
-             folder->created,
-             folder->o.c_str(),
-             folder->tx,
-             folder->updated,
-             folder->uuid.c_str());
+    sqlite3 *db;
+    int rc;
 
-    DBGVAR(folder->uuid);
+    rc = sqlite3_open(DBFILE, &db);
 
-    sql_exec(buf);
-    free(buf);
+    if(rc){
+        std::ostringstream os;
+        os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    sqlite3_stmt *stmt;
+    if ((rc = sqlite3_prepare_v2(db, SQL_REPLACE_FOLDER, -1, &stmt, nullptr) != SQLITE_OK)) {
+        std::ostringstream os;
+        os << "libopvault: SQL prepare error - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    } else {
+        sqlite3_bind_int64(stmt, 1, folder->created);
+        sqlite3_bind_text(stmt, 2, folder->o.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 3, folder->tx);
+        sqlite3_bind_int64(stmt, 4, folder->updated);
+        sqlite3_bind_text(stmt, 5, folder->uuid.c_str(), -1, SQLITE_STATIC);
+
+        int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            std::ostringstream os;
+            os << "libopvault: error replacing data in Folders table - error code: " << rc;
+            sqlite3_close(db);
+            throw std::runtime_error(os.str());
+        }
+
+        sqlite3_finalize(stmt);
+    }
+
+    sqlite3_close(db);
 }
 
 void Folder::insert_folders(std::vector<FolderItem> &folders) {

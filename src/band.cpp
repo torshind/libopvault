@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <sqlite3.h>
+
 #include "dbg.h"
 #include "const.h"
 #include "banditem.h"
@@ -50,39 +52,50 @@ void Band::create_table() {
 
 void Band::insert_item(BaseItem* base_item) {
     BandItem* item = static_cast<BandItem*>(base_item);
-    int sz = snprintf(nullptr, 0, SQL_REPLACE_ITEM,
-                      item->created,
-                      item->o.c_str(),
-                      item->tx,
-                      item->updated,
-                      item->uuid.c_str(),
-                      item->category.c_str(),
-                      item->d.c_str(),
-                      item->fave,
-                      item->folder.c_str(),
-                      item->hmac.c_str(),
-                      item->k.c_str(),
-                      item->trashed) + 1;
-    char *buf;
-    buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_REPLACE_ITEM,
-             item->created,
-             item->o.c_str(),
-             item->tx,
-             item->updated,
-             item->uuid.c_str(),
-             item->category.c_str(),
-             item->d.c_str(),
-             item->fave,
-             item->folder.c_str(),
-             item->hmac.c_str(),
-             item->k.c_str(),
-             item->trashed);
+    sqlite3 *db;
+    int rc;
 
-    DBGVAR(item->uuid);
+    rc = sqlite3_open(DBFILE, &db);
 
-    sql_exec(buf);
-    free(buf);
+    if(rc){
+        std::ostringstream os;
+        os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    sqlite3_stmt *stmt;
+    if ((rc = sqlite3_prepare_v2(db, SQL_REPLACE_ITEM, -1, &stmt, nullptr) != SQLITE_OK)) {
+        std::ostringstream os;
+        os << "libopvault: SQL prepare error - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    } else {
+        sqlite3_bind_int64(stmt, 1, item->created);
+        sqlite3_bind_text(stmt, 2, item->o.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 3, item->tx);
+        sqlite3_bind_int64(stmt, 4, item->updated);
+        sqlite3_bind_text(stmt, 5, item->uuid.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, item->category.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 7, item->d.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 8, item->fave);
+        sqlite3_bind_text(stmt, 9, item->folder.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 10, item->hmac.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 11, item->k.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 12, item->trashed);
+
+        int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            std::ostringstream os;
+            os << "libopvault: error replacing data in Folders table - error code: " << rc;
+            sqlite3_close(db);
+            throw std::runtime_error(os.str());
+        }
+
+        sqlite3_finalize(stmt);
+    }
+
+    sqlite3_close(db);
 }
 
 void Band::insert_items(std::vector<BandItem> &items) {
@@ -135,7 +148,7 @@ BaseItem* Band::json2item(json &j) {
       j["folder"].is_string() ? j["folder"].get<std::string>() : "",
       j["hmac"].is_string() ? j["hmac"].get<std::string>() : "",
       j["k"].is_string() ? j["k"].get<std::string>() : "",
-      j["trashed"].is_boolean() ? j["trashed"].get<int>() : j["trashed"].is_string() ? j["trashed"].get<int>() : -1);
+      j["trashed"].is_boolean() ? j["trashed"].get<int>() : j["trashed"].is_string() ? std::stoi(j["trashed"].get<std::string>()) : -1);
 }
 
 void Band::setup_filenames() {

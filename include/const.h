@@ -72,7 +72,7 @@ const char SQL_CREATE_PROFILE[] = "CREATE TABLE Profile (" \
                                   "createdAt     INT  NOT NULL );";
 
 const char SQL_INSERT_PROFILE_ITEM[] = "INSERT INTO Profile (lastUpdatedBy, updatedAt, profileName, salt, passwordHint, masterKey, iterations, uuid, overviewKey, createdAt) " \
-                                       "VALUES ('%s', %ld, '%s', '%s', '%s', '%s', %u, '%s', '%s', %ld);";
+                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 const char SQL_CREATE_ITEMS[] = "CREATE TABLE Items (" \
                                 "created  INT  NOT NULL," \
@@ -89,7 +89,7 @@ const char SQL_CREATE_ITEMS[] = "CREATE TABLE Items (" \
                                 "trashed  INT  NOT NULL );";
 
 const char SQL_REPLACE_ITEM[] = "INSERT OR REPLACE INTO Items (created, o, tx, updated, uuid, category, d, fave, folder, hmac, k, trashed) " \
-                                "VALUES (%ld, '%s', %ld, %ld, '%s', '%s', '%s', %ld, '%s', '%s', '%s', %d);";
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
                                   "created  INT  NOT NULL," \
@@ -99,7 +99,7 @@ const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
                                   "uuid     CHAR(32) PRIMARY KEY NOT NULL );";
 
 const char SQL_REPLACE_FOLDER[] = "INSERT OR REPLACE INTO Folders (created, o, tx, updated, uuid) " \
-                                  "VALUES (%ld, '%s', %ld, %ld, '%s');";
+                                  "VALUES (?, ?, ?, ?, ?);";
 
 const char SQL_UPDATE_LONG[] = "UPDATE %s SET %s = %ld WHERE uuid = '%s';";
 

@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <sqlite3.h>
+
 #include "dbg.h"
 #include "vault.h"
 
@@ -62,35 +64,48 @@ void Profile::create_table() {
 
 void Profile::insert_item(BaseItem* base_item) {
     ProfileItem* profile = static_cast<ProfileItem*>(base_item);
-    int sz = snprintf(nullptr, 0, SQL_INSERT_PROFILE_ITEM,
-                      profile->lastUpdatedBy.c_str(),
-                      profile->updatedAt,
-                      profile->profileName.c_str(),
-                      profile->salt.c_str(),
-                      profile->passwordHint.c_str(),
-                      profile->masterKey.c_str(),
-                      profile->iterations,
-                      profile->uuid.c_str(),
-                      profile->overviewKey.c_str(),
-                      profile->createdAt) + 1;
-    char *buf;
-    buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_INSERT_PROFILE_ITEM,
-             profile->lastUpdatedBy.c_str(),
-             profile->updatedAt,
-             profile->profileName.c_str(),
-             profile->salt.c_str(),
-             profile->passwordHint.c_str(),
-             profile->masterKey.c_str(),
-             profile->iterations,
-             profile->uuid.c_str(),
-             profile->overviewKey.c_str(),
-             profile->createdAt);
+    sqlite3 *db;
+    int rc;
 
-    DBGVAR(profile->uuid);
+    rc = sqlite3_open(DBFILE, &db);
 
-    sql_exec(buf);
-    free(buf);
+    if(rc){
+        std::ostringstream os;
+        os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    sqlite3_stmt *stmt;
+    if ((rc = sqlite3_prepare_v2(db, SQL_INSERT_PROFILE_ITEM, -1, &stmt, nullptr) != SQLITE_OK)) {
+        std::ostringstream os;
+        os << "libopvault: SQL prepare error - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    } else {
+        sqlite3_bind_text(stmt, 1, profile->lastUpdatedBy.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 2, profile->updatedAt);
+        sqlite3_bind_text(stmt, 3, profile->profileName.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 4, profile->salt.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 5, profile->passwordHint.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, profile->masterKey.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 7, profile->iterations);
+        sqlite3_bind_text(stmt, 8, profile->uuid.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 9, profile->overviewKey.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 10, profile->createdAt);
+
+        int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            std::ostringstream os;
+            os << "libopvault: error inserting data in Profile table - error code: " << rc;
+            sqlite3_close(db);
+            throw std::runtime_error(os.str());
+        }
+
+        sqlite3_finalize(stmt);
+    }
+
+    sqlite3_close(db);
 }
 
 BaseItem* Profile::json2item(nlohmann::json &j) {
