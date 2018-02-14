@@ -86,13 +86,13 @@ void Band::insert_item(BaseItem* base_item) {
 }
 
 void Band::insert_items(std::vector<BandItem> &items) {
-    for(auto it : items) {
-        if (it.updateState) {
-            it.generate_hmac();
-            insert_item(&it);
-            it.updateState = false;
+    for(auto &item : items) {
+        if (item.updateState) {
+            item.generate_hmac();
+            insert_item(&item);
+            item.updateState = false;
         } else {
-            insert_item(&it);
+            insert_item(&item);
         }
     }
 }
@@ -100,9 +100,9 @@ void Band::insert_items(std::vector<BandItem> &items) {
 void Band::sync(std::vector<BandItem> &items) {
     std::unordered_map<std::string, UserItem*> local_map;
 
-    for (auto it=items.begin(); it!=items.end(); ++it) {
+    for (auto &item : items) {
         // Create a map with key uuid for local items
-        local_map.insert({it->uuid, &*it});
+        local_map.insert({item.uuid, &item});
     }
 
     setup_filenames();
@@ -115,9 +115,9 @@ void Band::sync(std::vector<BandItem> &items) {
 
     // New local items: sync new elements still in the map
     if (!local_map.empty()) {
-        for (auto it : local_map) {
+        for (auto const &item : local_map) {
             DBGMSG("new local item");
-            append(std::string("band_") + it.second->get_uuid()[0] + std::string(".js"), it.second);
+            append(std::string("band_") + item.second->get_uuid()[0] + std::string(".js"), item.second);
         }
     }
 }
@@ -135,28 +135,6 @@ BaseItem* Band::json2item(json &j) {
                         j["hmac"].is_string() ? j["hmac"].get<std::string>() : "",
                         j["k"].is_string() ? j["k"].get<std::string>() : "",
                         j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
-}
-
-void Band::item2json(BandItem* item, json &j) {
-    json j_item;
-    j_item["created"]  = item->created;
-    j_item["o"]        = item->o;
-    j_item["tx"]       = item->tx;
-    j_item["updated"]  = item->updated;
-    j_item["uuid"]     = item->uuid;
-    j_item["category"] = item->category;
-    j_item["d"]        = item->d;
-    j_item["fave"]     = item->fave;
-    j_item["folder"]   = item->folder;
-    j_item["hmac"]     = item->hmac;
-    j_item["k"]        = item->k;
-    if (item->trashed == 0) {
-        j_item["trashed"] = false;
-    } else if (item->trashed == 1) {
-        j_item["trashed"] = true;
-    }
-
-    j[item->uuid] = j_item;
 }
 
 void Band::setup_filenames() {

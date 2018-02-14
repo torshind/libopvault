@@ -79,8 +79,8 @@ void File::read(const std::string &filename, nlohmann::json &j) {
     }
 
 #ifndef NDEBUG
-    for (auto it = j.begin(); it != j.end(); ++it) {
-        DBGMSG(it.key() << " : " << it.value());
+    for (auto const &elem : j) {
+        DBGVAR(elem);
     }
 #endif
 }
@@ -95,17 +95,17 @@ void File::read(const std::string &filename) {
         throw;
     }
 
-    for(auto it : j) {
-        insert_json(it);
+    for(auto &elem : j) {
+        insert_json(elem);
     }
 }
 
 void File::read(const std::vector<std::string> &filenames) {
     size_t exept_count = 0;
 
-    for (auto it : filenames) {
+    for (auto const &filename : filenames) {
         try {
-            read(it);
+            read(filename);
         }
         catch (...) {
             exept_count++;
@@ -198,16 +198,16 @@ void File::sync(const std::string filename, std::unordered_map<std::string, User
     bool json_is_updated = false;
 
     read(filename, j);
-    for(auto it : j) {
+    for(auto &elem : j) {
         // Find uuid in local map
-        std::string uuid = it["uuid"].is_string() ? it["uuid"].get<std::string>() : "";
+        std::string uuid = elem["uuid"].is_string() ? elem["uuid"].get<std::string>() : "";
 
-        auto found = local_map.find(uuid);
+        auto const &found = local_map.find(uuid);
         if (found != local_map.end()) {
             // Get remote tx
             long remote_tx;
             try {
-                remote_tx = it["tx"].is_number_integer() ? it["tx"].get<long>() : -1;
+                remote_tx = elem["tx"].is_number_integer() ? elem["tx"].get<long>() : -1;
             }
             catch (...) {
                 throw;
@@ -223,7 +223,7 @@ void File::sync(const std::string filename, std::unordered_map<std::string, User
                     DBGMSG("merge local & remote changes");
                     long remote_updated;
                     try {
-                        remote_updated = it["updated"].is_number_integer() ? it["updated"].get<long>() : -1;
+                        remote_updated = elem["updated"].is_number_integer() ? elem["updated"].get<long>() : -1;
                     }
                     catch (...) {
                         throw;
@@ -231,7 +231,7 @@ void File::sync(const std::string filename, std::unordered_map<std::string, User
                     DBGVAR(remote_updated);
                     if (remote_updated > found->second->updated) {
                         DBGMSG("sync local with remote item");
-                        insert_json(it);
+                        insert_json(elem);
                     } else {
                         DBGMSG("sync remote with local item");
                         if (!json_is_updated) {
@@ -252,7 +252,7 @@ void File::sync(const std::string filename, std::unordered_map<std::string, User
                 // Check for remote changes: remote.tx > local.tx
                 if (remote_tx > found->second->tx) {
                     DBGMSG("sync local with remote item");
-                    insert_json(it);
+                    insert_json(elem);
                 }
             }
             // Remove from map
@@ -260,7 +260,7 @@ void File::sync(const std::string filename, std::unordered_map<std::string, User
         } else {
             // New remote item: insert in db
             DBGMSG("new remote item");
-            insert_json(it);
+            insert_json(elem);
         }
     }
     if (json_is_updated) {
@@ -272,9 +272,9 @@ void File::sync(const std::string filename, std::unordered_map<std::string, User
 void File::sync(const std::vector<std::string> &filenames, std::unordered_map<std::string, UserItem *> &local_map) {
     size_t exept_count = 0;
 
-    for (auto it : filenames) {
+    for (auto const &filename : filenames) {
         try {
-            sync(it, local_map);
+            sync(filename, local_map);
         }
         catch (...) {
             exept_count++;

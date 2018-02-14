@@ -88,17 +88,17 @@ static void get_items(const Vault &vault) {
     vector<BandItem> items;
 
     vault.get_items(items);
-    for(auto it=items.begin(); it!=items.end(); ++it) {
-        cout << "Item " << it->get_uuid() << endl;
+    for(auto &item : items) {
+        cout << "Item " << item.get_uuid() << endl;
         string str;
-        it->decrypt_overview(str);
+        item.decrypt_overview(str);
         cout << "Overview: " << str << endl;
-        it->decrypt_data(str);
+        item.decrypt_data(str);
         cout << "Data: " << str << endl;
-        cout << "Category: " << it->get_category() << endl;
-        cout << "Fave: " << it->get_fave() << endl;
-        cout << "Folder: " << it->get_folder() << endl;
-        cout << "Trashed: " << it->get_trashed() << endl;
+        cout << "Category: " << item.get_category() << endl;
+        cout << "Fave: " << item.get_fave() << endl;
+        cout << "Folder: " << item.get_folder() << endl;
+        cout << "Trashed: " << item.get_trashed() << endl;
     }
 
 }
@@ -107,10 +107,10 @@ static void get_folders(const Vault &vault) {
     vector<FolderItem> folders;
 
     vault.get_folders(folders);
-    for(auto it=folders.begin(); it!=folders.end(); ++it) {
-        cout << "Folder " << it->get_uuid() << endl;
+    for(auto &folder : folders) {
+        cout << "Folder " << folder.get_uuid() << endl;
         string str;
-        it->decrypt_overview(str);
+        folder.decrypt_overview(str);
         cout << "Overview: " << str << endl;
     }
 }
@@ -121,16 +121,16 @@ static void get_items_folder(const Vault &vault) {
 
     vault.get_folders(folders);
 
-    for(auto it1=folders.begin(); it1!=folders.end(); ++it1) {
-        cout << "Folder " << it1->get_uuid() << endl;
+    for(auto &folder : folders) {
+        cout << "Folder " << folder.get_uuid() << endl;
         items.clear();
-        vault.get_items_folder(it1->get_uuid(), items);
-        for(auto it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->get_uuid() << endl;
+        vault.get_items_folder(folder.get_uuid(), items);
+        for(auto &item : items) {
+            cout << "Item " << item.get_uuid() << endl;
             string str;
-            it2->decrypt_overview(str);
+            item.decrypt_overview(str);
             cout << "Overview: " << str << endl;
-            it2->decrypt_data(str);
+            item.decrypt_data(str);
             cout << "Data: " << str << endl;
         }
     }
@@ -140,16 +140,16 @@ static void get_items_folder(const Vault &vault) {
 static void get_items_category(const Vault &vault) {
     vector<BandItem> items;
 
-    for(auto it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
-        cout << "Category " << it1->second << endl;
+    for(auto &cat : CATEGORIES) {
+        cout << "Category " << cat.second << endl;
         items.clear();
-        vault.get_items_category(it1->first, items);
-        for(auto it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->get_uuid() << endl;
+        vault.get_items_category(cat.first, items);
+        for(auto &item : items) {
+            cout << "Item " << item.get_uuid() << endl;
             string str;
-            it2->decrypt_overview(str);
+            item.decrypt_overview(str);
             cout << "Overview: " << str << endl;
-            it2->decrypt_data(str);
+            item.decrypt_data(str);
             cout << "Data: " << str << endl;
         }
     }

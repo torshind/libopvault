@@ -89,7 +89,6 @@ void BandItem::to_json(nlohmann::json &j) {
     }
 
     j[uuid] = j_item;
-
 }
 
 std::string BandItem::get_hmac_input_str() {

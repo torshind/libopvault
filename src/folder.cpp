@@ -69,10 +69,10 @@ void Folder::insert_item(BaseItem* base_item) {
 }
 
 void Folder::insert_folders(std::vector<FolderItem> &folders) {
-    for(auto it : folders) {
-        if (it.updateState) {
-            insert_item(&it);
-            it.updateState = false;
+    for(auto &folder : folders) {
+        if (folder.updateState) {
+            insert_item(&folder);
+            folder.updateState = false;
         }
     }
 }
@@ -80,9 +80,9 @@ void Folder::insert_folders(std::vector<FolderItem> &folders) {
 void Folder::sync(std::vector<FolderItem> &folders) {
     std::unordered_map<std::string, UserItem*> local_map;
 
-    for (auto it=folders.begin(); it!=folders.end(); ++it) {
+    for (auto &folder : folders) {
         // Create a map with key uuid for local items
-        local_map.insert({it->uuid, &*it});
+        local_map.insert({folder.uuid, &folder});
     }
 
     try {
@@ -94,8 +94,8 @@ void Folder::sync(std::vector<FolderItem> &folders) {
 
     // New local items: sync new elements still in the map
     if (!local_map.empty()) {
-        for (auto it : local_map) {
-            append("folders.js", it.second);
+        for (auto const &folder : local_map) {
+            append("folders.js", folder.second);
         }
     }
 }
@@ -106,17 +106,6 @@ BaseItem* Folder::json2item(nlohmann::json &j) {
                           j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
                           j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
                           j["uuid"].is_string() ? j["uuid"].get<std::string>() : "");
-}
-
-void Folder::folder2json(FolderItem *folder, nlohmann::json &j) {
-    json j_item;
-    j_item["created"]  = folder->created;
-    j_item["o"]        = folder->o;
-    j_item["tx"]       = folder->tx;
-    j_item["updated"]  = folder->updated;
-    j_item["uuid"]     = folder->uuid;
-
-    j[folder->uuid] = j_item;
 }
 
 void Folder::update_tx(BaseItem* base_item) {
