@@ -35,10 +35,7 @@ using json = nlohmann::json;
 namespace OPVault {
 
 void Band::read() {
-    std::vector<std::string> filenames;
-    for (int index = 0; index < BAND_NUM; ++index) {
-        filenames.push_back(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
-    }
+    setup_filenames();
 
     try {
         File::read(filenames);
@@ -108,20 +105,14 @@ void Band::sync(std::vector<BandItem> &items) {
         local_map.insert({it->uuid, &*it});
     }
 
-    int exept_count = 0;
-    for (int index=0; index<BAND_NUM; ++index) {
-        try {
-            File::sync(std::string("band_") + BAND_INDEXES[index] + std::string(".js"), local_map);
-        }
-        catch (...) {
-            exept_count++;
-            if (exept_count == BAND_NUM)
-            {
-                throw;
-            }
-            continue;
-        }
+    setup_filenames();
+
+    try {
+        File::sync(filenames, local_map);
+    } catch (...) {
+        throw;
     }
+
     // New local items: sync new elements still in the map
     if (!local_map.empty()) {
         for (auto it : local_map) {
@@ -166,6 +157,14 @@ void Band::item2json(BandItem* item, json &j) {
     }
 
     j[item->uuid] = j_item;
+}
+
+void Band::setup_filenames() {
+    if (filenames.empty()) {
+        for (int index = 0; index < BAND_NUM; ++index) {
+            filenames.push_back(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
+        }
+    }
 }
 
 void Band::update_tx(BaseItem* base_item) {

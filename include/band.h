@@ -49,7 +49,10 @@ public:
     void sync(std::vector<BandItem> &items);
 
 private:
+    std::vector<std::string> filenames;
+
     void item2json(BandItem* item, nlohmann::json &j);
+    void setup_filenames();
 };
 
 }

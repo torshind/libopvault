@@ -49,6 +49,7 @@ protected:
     void append(const std::string &filename, nlohmann::json &j);
     void append(const std::string &filename, UserItem* user_item);
     void sync(const std::string filename, std::unordered_map<std::string, UserItem*> &local_map);
+    void sync(const std::vector<std::string> &filenames, std::unordered_map<std::string, UserItem*> &local_map);
 
     void sql_exec(const char sql[]);
     void sql_update_long(const std::string &table, const std::string &col, const std::string &uuid, long val);

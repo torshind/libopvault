@@ -264,8 +264,25 @@ void File::sync(const std::string filename, std::unordered_map<std::string, User
         }
     }
     if (json_is_updated) {
-        DBGMSG("write band file");
+        DBGMSG("write file");
         File::write(filename, j);
+    }
+}
+
+void File::sync(const std::vector<std::string> &filenames, std::unordered_map<std::string, UserItem *> &local_map) {
+    size_t exept_count = 0;
+
+    for (auto it : filenames) {
+        try {
+            sync(it, local_map);
+        }
+        catch (...) {
+            exept_count++;
+            if (exept_count == filenames.size()) {
+                throw;
+            }
+            continue;
+        }
     }
 }
 
