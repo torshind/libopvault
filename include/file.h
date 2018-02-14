@@ -30,7 +30,7 @@ SOFTWARE.
 
 #include "json.hpp"
 #include "const.h"
-#include "baseitem.h"
+#include "useritem.h"
 
 namespace OPVault {
 
@@ -47,6 +47,8 @@ protected:
     void read(const std::vector<std::string> &filenames);
     void write(const std::string &filename, nlohmann::json &j);
     void append(const std::string &filename, nlohmann::json &j);
+    void append(const std::string &filename, UserItem* user_item);
+    void sync(const std::string filename, std::unordered_map<std::string, UserItem*> &local_map);
 
     void sql_exec(const char sql[]);
     void sql_update_long(const std::string &table, const std::string &col, const std::string &uuid, long val);
@@ -54,6 +56,7 @@ protected:
     void insert_json(nlohmann::json &j);
     virtual BaseItem* json2item(nlohmann::json &j) = 0;
     virtual void insert_item(BaseItem* base_item) = 0;
+    virtual void update_tx(BaseItem* base_item) = 0;
 
 public:
     void set_directory(const std::string &d) { directory = d; }

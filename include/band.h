@@ -39,7 +39,8 @@ protected:
     Band() {}
 
     virtual BaseItem* json2item(nlohmann::json &j);
-    virtual void insert_item(BaseItem* item);
+    virtual void insert_item(BaseItem* base_item);
+    virtual void update_tx(BaseItem* base_item);
 
 public:
     void read();
@@ -49,7 +50,6 @@ public:
 
 private:
     void item2json(BandItem* item, nlohmann::json &j);
-    void update_tx(BandItem* item);
 };
 
 }

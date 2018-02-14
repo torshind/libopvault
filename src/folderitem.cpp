@@ -27,4 +27,16 @@ SOFTWARE.
 
 namespace OPVault {
 
+void FolderItem::to_json(nlohmann::json &j) {
+    nlohmann::json j_item;
+    j_item["created"]  = created;
+    j_item["o"]        = o;
+    j_item["tx"]       = tx;
+    j_item["updated"]  = updated;
+    j_item["uuid"]     = uuid;
+
+    j[uuid] = j_item;
+
+}
+
 }

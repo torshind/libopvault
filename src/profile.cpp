@@ -106,4 +106,8 @@ BaseItem* Profile::json2item(nlohmann::json &j) {
                            j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1);
 }
 
+void Profile::update_tx(BaseItem* base_item) {
+    // PROFILE SYNC IS NOT SUPPORTED
+}
+
 }

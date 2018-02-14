@@ -36,6 +36,9 @@ class FolderItem : public UserItem {
 public:
     FolderItem() {}
 
+protected:
+    virtual void to_json(nlohmann::json &j);
+
 private:
     FolderItem(long _created,
                std::string _o,

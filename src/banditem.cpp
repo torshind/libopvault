@@ -69,6 +69,29 @@ void BandItem::decrypt_data(std::string& data) {
     }
 }
 
+void BandItem::to_json(nlohmann::json &j) {
+    nlohmann::json j_item;
+    j_item["created"]  = created;
+    j_item["o"]        = o;
+    j_item["tx"]       = tx;
+    j_item["updated"]  = updated;
+    j_item["uuid"]     = uuid;
+    j_item["category"] = category;
+    j_item["d"]        = d;
+    j_item["fave"]     = fave;
+    j_item["folder"]   = folder;
+    j_item["hmac"]     = hmac;
+    j_item["k"]        = k;
+    if (trashed == 0) {
+        j_item["trashed"] = false;
+    } else if (trashed == 1) {
+        j_item["trashed"] = true;
+    }
+
+    j[uuid] = j_item;
+
+}
+
 std::string BandItem::get_hmac_input_str() {
     return std::string(
                 "category" + category +

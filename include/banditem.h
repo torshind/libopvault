@@ -57,6 +57,9 @@ public:
 
     void decrypt_data(std::string& data);
 
+protected:
+    virtual void to_json(nlohmann::json &j);
+
 private:
     BandItem(long _created,
              std::string _o,

@@ -31,7 +31,6 @@ SOFTWARE.
 #include <sqlite3.h>
 
 #include "dbg.h"
-#include "json.hpp"
 
 #include "file.h"
 
@@ -183,6 +182,91 @@ void File::append(const std::string &filename, nlohmann::json &j) {
     iofs << json_string << "});";
 
     iofs.close();
+}
+
+void File::append(const std::string &filename, UserItem *user_item) {
+    json j;
+
+    update_tx(user_item);
+    // append new element to file
+    user_item->to_json(j);
+    append(filename, j);
+}
+
+void File::sync(const std::string filename, std::unordered_map<std::string, UserItem*> &local_map) {
+    nlohmann::json j;
+    bool json_is_updated = false;
+
+    read(filename, j);
+    for(auto it : j) {
+        // Find uuid in local map
+        std::string uuid = it["uuid"].is_string() ? it["uuid"].get<std::string>() : "";
+
+        auto found = local_map.find(uuid);
+        if (found != local_map.end()) {
+            // Get remote tx
+            long remote_tx;
+            try {
+                remote_tx = it["tx"].is_number_integer() ? it["tx"].get<long>() : -1;
+            }
+            catch (...) {
+                throw;
+            }
+            DBGVAR(remote_tx);
+
+            // Check for local changes: local.updated > local.tx
+            DBGVAR(found->second->updated);
+            DBGVAR(found->second->tx);
+            if (found->second->updated > found->second->tx) {
+                if (remote_tx > found->second->tx) {
+                    // merge: keep most recent one
+                    DBGMSG("merge local & remote changes");
+                    long remote_updated;
+                    try {
+                        remote_updated = it["updated"].is_number_integer() ? it["updated"].get<long>() : -1;
+                    }
+                    catch (...) {
+                        throw;
+                    }
+                    DBGVAR(remote_updated);
+                    if (remote_updated > found->second->updated) {
+                        DBGMSG("sync local with remote item");
+                        insert_json(it);
+                    } else {
+                        DBGMSG("sync remote with local item");
+                        if (!json_is_updated) {
+                            json_is_updated = true;
+                        }
+                        update_tx(found->second);
+                        found->second->to_json(j);
+                    }
+                } else {
+                    DBGMSG("sync remote with local item");
+                    if (!json_is_updated) {
+                        json_is_updated = true;
+                    }
+                    update_tx(found->second);
+                    found->second->to_json(j);
+                }
+            } else {
+                // Check for remote changes: remote.tx > local.tx
+                if (remote_tx > found->second->tx) {
+                    DBGMSG("sync local with remote item");
+                    insert_json(it);
+                }
+            }
+            // Remove from map
+            local_map.erase(found->first);
+        } else {
+            // New remote item: insert in db
+            DBGMSG("new remote item");
+            insert_json(it);
+        }
+    }
+    if (json_is_updated) {
+        DBGMSG("write band file");
+        File::write(filename, j);
+    }
 }
 
 void File::sql_exec(const char sql[]) {

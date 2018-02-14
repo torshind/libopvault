@@ -40,6 +40,7 @@ public:
 protected:
     virtual BaseItem* json2item(nlohmann::json &j);
     virtual void insert_item(BaseItem* base_item);
+    virtual void update_tx(BaseItem* base_item);
 
 public:
     void read();

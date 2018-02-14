@@ -1,11 +1,15 @@
 #ifndef USERENTRY_H
 #define USERENTRY_H
 
+#include "json.hpp"
+
 #include "baseitem.h"
 
 namespace OPVault {
 
-class UserItem : protected BaseItem {
+class UserItem : public BaseItem {
+    friend class File;
+
 protected:
     UserItem() {
         tx = 0;
@@ -27,7 +31,7 @@ protected:
 
     virtual void init();
     void setup_update();
-
+    virtual void to_json(nlohmann::json &j) = 0;
 
 public:
     std::string& get_overview() { return o; }
