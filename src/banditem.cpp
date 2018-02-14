@@ -96,7 +96,7 @@ std::string BandItem::get_hmac_input_str() {
                 "category" + category +
                 "created" + std::to_string(created) +
                 "d" + d +
-                (fave == 0 ? "" : "fave" + std::to_string(fave)) +
+                (fave == -1 ? "" : "fave" + std::to_string(fave)) +
                 (folder == "" ? "" : "folder" + folder) +
                 "k" + k +
                 "o" + o +
@@ -175,7 +175,7 @@ void BandItem::set_data(const std::string &_d) {
     encrypt_opdata(_d, iv, item_key, d);
 }
 
-void BandItem::set_fave(const unsigned long _fave) {
+void BandItem::set_fave(const long _fave) {
     setup_update();
 
     fave = _fave;

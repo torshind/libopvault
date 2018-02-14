@@ -38,20 +38,20 @@ class BandItem : public UserItem {
 
 public:
     BandItem() {
-        fave = 0;
+        fave = -1;
         folder = "";
         trashed = -1;
         updateState = false;
     }
 
     std::string& get_category() { return category; }
-    unsigned long get_fave() { return fave; }
+    long get_fave() { return fave; }
     std::string& get_folder() { return folder; }
     int get_trashed() { return trashed; }
 
     void set_category(const std::string &_category);
     void set_data(const std::string &_d);
-    void set_fave(const unsigned long _fave);
+    void set_fave(const long _fave);
     void set_folder(const std::string &_folder);
     void set_trashed(const int _trashed);
 
@@ -68,7 +68,7 @@ private:
              std::string _uuid,
              std::string _category,
              std::string _d,
-             unsigned long _fave,
+             long _fave,
              std::string _folder,
              std::string _hmac,
              std::string _k,
@@ -91,7 +91,7 @@ private:
 
     std::string category;
     std::string d;
-    unsigned long fave;
+    long fave;
     std::string folder;
     std::string hmac;
     std::string k;

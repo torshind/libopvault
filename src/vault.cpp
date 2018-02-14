@@ -80,10 +80,7 @@ void Vault::get_profile() {
         os << "libopvault: SQL prepare error - error code: " << rc;
         sqlite3_close(db);
         throw std::runtime_error(os.str());
-    }
-
-
-    else {
+    } else {
         if ((rc = sqlite3_step(stmt)) != SQLITE_ROW) {
             std::ostringstream os;
             os << "libopvault: profile table not present in DB - error code: " << rc;
@@ -132,8 +129,7 @@ void Vault::get_folders(std::vector<FolderItem> &folders) const {
         os << "libopvault: SQL prepare error - error code: " << rc;
         sqlite3_close(db);
         throw std::runtime_error(os.str());
-    }
-    else {
+    } else {
         for (;;) {
             int rc = sqlite3_step(stmt);
             if (rc == SQLITE_DONE)
@@ -177,9 +173,9 @@ void Vault::get_items_query(const char query[], std::vector<BandItem> &items) co
     }
 
     sqlite3_stmt *stmt;
-    if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK)
+    if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
         std::cout << "SQL prepare error" << std::endl;
-    else {
+    } else {
         for (;;) {
             int rc = sqlite3_step(stmt);
             if (rc == SQLITE_DONE)
@@ -198,7 +194,7 @@ void Vault::get_items_query(const char query[], std::vector<BandItem> &items) co
             item.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
             item.category = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
             item.d = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-            item.fave = (unsigned long) sqlite3_column_int64(stmt, 7);
+            item.fave = sqlite3_column_int64(stmt, 7);
             item.folder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
             item.hmac = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
             item.k = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10));

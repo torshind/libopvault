@@ -123,18 +123,19 @@ void Band::sync(std::vector<BandItem> &items) {
 }
 
 BaseItem* Band::json2item(json &j) {
-    return new BandItem(j["created"].is_number_integer() ? j["created"].get<long>() : -1,
-                        j["o"].is_string() ? j["o"].get<std::string>() : "",
-                        j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
-                        j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
-                        j["uuid"].is_string() ? j["uuid"].get<std::string>() : "",
-                        j["category"].is_string() ? j["category"].get<std::string>() : "",
-                        j["d"].is_string() ? j["d"].get<std::string>() : "",
-                        j["fave"].is_number_integer() ? j["fave"].get<unsigned long>() : 0,
-                        j["folder"].is_string() ? j["folder"].get<std::string>() : "",
-                        j["hmac"].is_string() ? j["hmac"].get<std::string>() : "",
-                        j["k"].is_string() ? j["k"].get<std::string>() : "",
-                        j["trashed"].is_boolean() ? j["trashed"].get<int>() : -1);
+  return new BandItem(
+      j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+      j["o"].is_string() ? j["o"].get<std::string>() : "",
+      j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+      j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+      j["uuid"].is_string() ? j["uuid"].get<std::string>() : "",
+      j["category"].is_string() ? j["category"].get<std::string>() : "",
+      j["d"].is_string() ? j["d"].get<std::string>() : "",
+      j["fave"].is_number_integer() ? j["fave"].get<long>() : -1,
+      j["folder"].is_string() ? j["folder"].get<std::string>() : "",
+      j["hmac"].is_string() ? j["hmac"].get<std::string>() : "",
+      j["k"].is_string() ? j["k"].get<std::string>() : "",
+      j["trashed"].is_boolean() ? j["trashed"].get<int>() : j["trashed"].is_string() ? j["trashed"].get<int>() : -1);
 }
 
 void Band::setup_filenames() {

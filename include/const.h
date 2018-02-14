@@ -89,7 +89,7 @@ const char SQL_CREATE_ITEMS[] = "CREATE TABLE Items (" \
                                 "trashed  INT  NOT NULL );";
 
 const char SQL_REPLACE_ITEM[] = "INSERT OR REPLACE INTO Items (created, o, tx, updated, uuid, category, d, fave, folder, hmac, k, trashed) " \
-                                "VALUES (%ld, '%s', %ld, %ld, '%s', '%s', '%s', %lu, '%s', '%s', '%s', %d);";
+                                "VALUES (%ld, '%s', %ld, %ld, '%s', '%s', '%s', %ld, '%s', '%s', '%s', %d);";
 
 const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
                                   "created  INT  NOT NULL," \
