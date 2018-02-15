@@ -37,6 +37,9 @@ Vault::Vault(const std::string &cloud_data_dir, const std::string &local_data_di
     } else {
         DBGMSG("create DB");
         create_db(cloud_data_dir);
+        get_profile();
+        setup_profile(master_password);
+        return;
     }
 
     Profile pro;
@@ -49,10 +52,8 @@ Vault::Vault(const std::string &cloud_data_dir, const std::string &local_data_di
             remove(std::string(local_data_dir + "opvault.db").c_str());
             create_db(cloud_data_dir);
         } else {
-            profile.derive_keys(master_password);
-            profile.get_overview_key();
-            profile.get_master_key();
-            sync(cloud_data_dir);
+            setup_profile(master_password);
+            sync();
         }
     }
     catch (...) {
@@ -79,10 +80,7 @@ void Vault::get_profile() {
         os << "libopvault: SQL prepare error - error code: " << rc;
         sqlite3_close(db);
         throw std::runtime_error(os.str());
-    }
-
-
-    else {
+    } else {
         if ((rc = sqlite3_step(stmt)) != SQLITE_ROW) {
             std::ostringstream os;
             os << "libopvault: profile table not present in DB - error code: " << rc;
@@ -90,7 +88,7 @@ void Vault::get_profile() {
             throw std::runtime_error(os.str());
         }
         profile.lastUpdatedBy = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        profile.updatedAt = sqlite3_column_int(stmt, 1);
+        profile.updatedAt = sqlite3_column_int64(stmt, 1);
         profile.profileName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
         profile.salt = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
         profile.passwordHint = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
@@ -98,7 +96,7 @@ void Vault::get_profile() {
         profile.iterations = (unsigned int) sqlite3_column_int(stmt, 6);
         profile.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
         profile.overviewKey = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
-        profile.createdAt = sqlite3_column_int(stmt, 9);
+        profile.createdAt = sqlite3_column_int64(stmt, 9);
 
         sqlite3_finalize(stmt);
     }
@@ -106,7 +104,13 @@ void Vault::get_profile() {
     sqlite3_close(db);
 }
 
-void Vault::get_folders(std::vector<FolderEntry> &folders) const {
+void Vault::setup_profile(const std::string &master_password) {
+    profile.derive_keys(master_password);
+    profile.get_overview_key();
+    profile.get_master_key();
+}
+
+void Vault::get_folders(std::vector<FolderItem> &folders) const {
     sqlite3 *db;
     int rc;
 
@@ -125,8 +129,7 @@ void Vault::get_folders(std::vector<FolderEntry> &folders) const {
         os << "libopvault: SQL prepare error - error code: " << rc;
         sqlite3_close(db);
         throw std::runtime_error(os.str());
-    }
-    else {
+    } else {
         for (;;) {
             int rc = sqlite3_step(stmt);
             if (rc == SQLITE_DONE)
@@ -137,11 +140,11 @@ void Vault::get_folders(std::vector<FolderEntry> &folders) const {
                 sqlite3_close(db);
                 throw std::runtime_error(os.str());
             }
-            FolderEntry folder;
-            folder.created = sqlite3_column_int(stmt, 0);
+            FolderItem folder;
+            folder.created = sqlite3_column_int64(stmt, 0);
             folder.o = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            folder.tx = sqlite3_column_int(stmt, 2);
-            folder.updated = sqlite3_column_int(stmt, 3);
+            folder.tx = sqlite3_column_int64(stmt, 2);
+            folder.updated = sqlite3_column_int64(stmt, 3);
             folder.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
             folders.push_back(folder);
         }
@@ -151,12 +154,12 @@ void Vault::get_folders(std::vector<FolderEntry> &folders) const {
     sqlite3_close(db);
 }
 
-void Vault::set_folders(std::vector<FolderEntry> &folders) {
+void Vault::insert_folders(std::vector<FolderItem> &folders) {
     Folder folder;
-    folder.insert_all_entries(folders);
+    folder.insert_folders(folders);
 }
 
-void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) const {
+void Vault::get_items_query(const char query[], std::vector<BandItem> &items) const {
     sqlite3 *db;
     int rc;
 
@@ -170,9 +173,9 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) c
     }
 
     sqlite3_stmt *stmt;
-    if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK)
+    if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
         std::cout << "SQL prepare error" << std::endl;
-    else {
+    } else {
         for (;;) {
             int rc = sqlite3_step(stmt);
             if (rc == SQLITE_DONE)
@@ -183,15 +186,15 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) c
                 sqlite3_close(db);
                 throw std::runtime_error(os.str());
             }
-            BandEntry item;
-            item.created = sqlite3_column_int(stmt, 0);
+            BandItem item;
+            item.created = sqlite3_column_int64(stmt, 0);
             item.o = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            item.tx = sqlite3_column_int(stmt, 2);
-            item.updated = sqlite3_column_int(stmt, 3);
+            item.tx = sqlite3_column_int64(stmt, 2);
+            item.updated = sqlite3_column_int64(stmt, 3);
             item.uuid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
             item.category = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
             item.d = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-            item.fave = (unsigned long) sqlite3_column_int(stmt, 7);
+            item.fave = sqlite3_column_int64(stmt, 7);
             item.folder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
             item.hmac = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
             item.k = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10));
@@ -207,46 +210,43 @@ void Vault::get_items_query(const char query[], std::vector<BandEntry> &items) c
 void Vault::create_db(const std::string &cloud_data_dir) {
     Profile pro;
     pro.set_directory(cloud_data_dir);
+    pro.create_table();
     try {
         pro.read();
     }
     catch (...) {
         throw;
     }
-    pro.create_table();
-    pro.insert_entry();
 
-    Folder folders;
+    Folder folder;
+    folder.create_table();
     try {
-        folders.read();
+        folder.read();
     }
     catch (...) {
         throw;
     }
-    folders.create_table();
-    folders.insert_all_entries();
 
     Band band;
+    band.create_table();
     try {
         band.read();
     }
     catch (...) {
         throw;
     }
-    band.create_table();
-    band.insert_all_entries();
 }
 
-void Vault::get_items(std::vector<BandEntry> &items) const {
+void Vault::get_items(std::vector<BandItem> &items) const {
     get_items_query(SQL_SELECT_ITEMS, items);
 }
 
-void Vault::set_items(std::vector<BandEntry> &items) {
+void Vault::insert_items(std::vector<BandItem> &items) {
     Band band;
-    band.insert_all_entries(items);
+    band.insert_items(items);
 }
 
-void Vault::get_items_folder(std::string folder, std::vector<BandEntry> &items) const {
+void Vault::get_items_folder(const std::string &folder, std::vector<BandItem> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_FOLDER, folder.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
@@ -256,7 +256,7 @@ void Vault::get_items_folder(std::string folder, std::vector<BandEntry> &items) 
     free(buf);
 }
 
-void Vault::get_items_category(std::string category, std::vector<BandEntry> &items) const {
+void Vault::get_items_category(const std::string &category, std::vector<BandItem> &items) const {
     int sz = snprintf(nullptr, 0, SQL_SELECT_ITEMS_CATEGORY, category.c_str()) + 1;
     char *buf;
     buf = (char*) malloc((size_t) sz);
@@ -266,10 +266,12 @@ void Vault::get_items_category(std::string category, std::vector<BandEntry> &ite
     free(buf);
 }
 
-void Vault::sync(const std::string &cloud_data_dir) {
-    Folder folders;
+void Vault::sync() {
+    Folder folder;
     try {
-//        folders.sync();
+        std::vector<FolderItem> folders;
+        get_folders(folders);
+        folder.sync(folders);
     }
     catch (...) {
         throw;
@@ -277,7 +279,9 @@ void Vault::sync(const std::string &cloud_data_dir) {
 
     Band band;
     try {
-//        band.sync();
+        std::vector<BandItem> items;
+        get_items(items);
+        band.sync(items);
     }
     catch (...) {
         throw;

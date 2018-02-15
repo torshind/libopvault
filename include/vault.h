@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef VAULT_H
-#define VAULT_H
+#pragma once
 
 #include <vector>
 
@@ -40,22 +39,21 @@ public:
     Vault(const std::string &cloud_data_dir, const std::string &local_data_dir, const std::string &master_password);
 
 private:
-    ProfileEntry profile;
+    ProfileItem profile;
 
     void get_profile();
-    void get_items_query(const char query[], std::vector<BandEntry> &items) const;
+    void setup_profile(const std::string &master_password);
+    void get_items_query(const char query[], std::vector<BandItem> &items) const;
     void create_db(const std::string &cloud_data_dir);
 
 public:
-    void get_folders(std::vector<FolderEntry> &folders) const;
-    void set_folders(std::vector<FolderEntry> &folders);
-    void get_items(std::vector<BandEntry> &items) const;
-    void set_items(std::vector<BandEntry> &items);
-    void get_items_folder(std::string folder, std::vector<BandEntry> &items) const;
-    void get_items_category(std::string category, std::vector<BandEntry> &items) const;
-    void sync(const std::string &cloud_data_dir);
+    void get_folders(std::vector<FolderItem> &folders) const;
+    void insert_folders(std::vector<FolderItem> &folders);
+    void get_items(std::vector<BandItem> &items) const;
+    void insert_items(std::vector<BandItem> &items);
+    void get_items_folder(const std::string &folder, std::vector<BandItem> &items) const;
+    void get_items_category(const std::string &category, std::vector<BandItem> &items) const;
+    void sync();
 };
 
 }
-
-#endif // VAULT_H

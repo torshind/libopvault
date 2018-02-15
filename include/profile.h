@@ -23,10 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef PROFILE_H
-#define PROFILE_H
+#pragma once
 
-#include "profileentry.h"
+#include "profileitem.h"
 
 #include "file.h"
 
@@ -37,16 +36,15 @@ class Profile : public File
 public:
     Profile() {}
 
-private:
-    ProfileEntry profile;
+protected:
+    virtual BaseItem* json2item(nlohmann::json &j);
+    virtual void insert_item(BaseItem* base_item);
+    virtual void update_tx(BaseItem* base_item);
 
 public:
     void read();
-    int read_updatedAt();
     void create_table();
-    void insert_entry();
+    int read_updatedAt();
 };
 
 }
-
-#endif // PROFILE_H

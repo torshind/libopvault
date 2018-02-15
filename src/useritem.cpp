@@ -23,27 +23,58 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include <cryptopp/osrng.h>
 
-#include <iostream>
+#include <uuid/uuid.h>
 
-#ifndef NDEBUG
+#include "useritem.h"
 
-#define DBGVAR(x) \
-    do { \
-    std::cout << "DBG: " << __FILE__ << "(" << __LINE__ << ") " \
-    << #x << " = [" << (x) << "]" << std::endl; \
-    } while (0)
+using namespace CryptoPP;
 
-#define DBGMSG(msg) \
-    do { \
-    std::cout << "DBG: " << __FILE__ << "(" << __LINE__ << ") " \
-    << msg << std::endl; \
-    } while (0)
+namespace OPVault {
 
-#else
+void UserItem::decrypt_overview(std::string& overview) {
+    if (!o.empty()) {
+        decrypt_opdata(o, overview_key, overview);
+    }
+}
 
-#define DBGVAR(x) do {} while (0)
-#define DBGMSG(x) do {} while (0)
+void UserItem::init() {
+    created = time(nullptr);
 
-#endif
+    // Generate UUID
+    uuid_t uuid_bin;
+    char uuid_str[37];
+
+    uuid_generate(uuid_bin);
+    uuid_unparse_upper(uuid_bin, uuid_str);
+    uuid = std::string(uuid_str);
+    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
+}
+
+void UserItem::setup_update() {
+    updated = time(nullptr);
+    updateState = true;
+    if (uuid.empty()) {
+        init();
+    }
+}
+
+void UserItem::set_overview(const std::string &_o) {
+    setup_update();
+
+    SecByteBlock iv;
+
+    // Generate iv
+    AutoSeededRandomPool prng;
+    iv = SecByteBlock(AES::BLOCKSIZE);
+    prng.GenerateBlock(iv, AES::BLOCKSIZE);
+
+    if (!o.empty()) {
+        o.clear();
+    }
+
+    encrypt_opdata(_o, iv, overview_key, o);
+}
+
+}

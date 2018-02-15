@@ -23,11 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef BAND_H
-#define BAND_H
+#pragma once
 
 #include "file.h"
-#include "bandentry.h"
+#include "banditem.h"
 
 namespace OPVault {
 
@@ -38,18 +37,20 @@ class Band : public File
 protected:
     Band() {}
 
-private:
-    std::vector<BandEntry> items;
+    virtual BaseItem* json2item(nlohmann::json &j);
+    virtual void insert_item(BaseItem* base_item);
+    virtual void update_tx(BaseItem* base_item);
 
 public:
     void read();
     void create_table();
-    void insert_entry(BandEntry &item);
-    void insert_all_entries();
-    void insert_all_entries(std::vector<BandEntry> &items);
-    void sync();
+    void insert_items(std::vector<BandItem> &items);
+    void sync(std::vector<BandItem> &items);
+
+private:
+    std::vector<std::string> filenames;
+
+    void setup_filenames();
 };
 
 }
-
-#endif // BAND_H

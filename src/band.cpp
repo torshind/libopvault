@@ -23,52 +23,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <sqlite3.h>
+
 #include "dbg.h"
 #include "const.h"
-#include "bandentry.h"
+#include "banditem.h"
 #include "vault.h"
 
 #include "band.h"
 
-using json = nlohmann::json;
-
 namespace OPVault {
 
 void Band::read() {
-    int exept_count = 0;
-    for (int index=0; index<BAND_NUM; ++index) {
-        try {
-            File::read(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
-        }
-        catch (...) {
-            exept_count++;
-            if (exept_count == BAND_NUM)
-            {
-                throw;
-            }
-            continue;
-        }
-        for(auto it=data.begin(); it!=data.end(); ++it) {
-            BandEntry item;
-            try {
-                item = BandEntry( (*it)["created"].is_number_integer() ? (*it)["created"].get<long>() : -1,
-                                  (*it)["o"].is_string() ? (*it)["o"].get<std::string>() : "NULL",
-                                  (*it)["tx"].is_number_integer() ? (*it)["tx"].get<long>() : -1,
-                                  (*it)["updated"].is_number_integer() ? (*it)["updated"].get<long>() : -1,
-                                  (*it)["uuid"].is_string() ? (*it)["uuid"].get<std::string>() : "NULL",
-                                  (*it)["category"].is_string() ? (*it)["category"].get<std::string>() : "NULL",
-                                  (*it)["d"].is_string() ? (*it)["d"].get<std::string>() : "NULL",
-                                  (*it)["fave"].is_number_integer() ? (*it)["fave"].get<unsigned long>() : 0,
-                                  (*it)["folder"].is_string() ? (*it)["folder"].get<std::string>() : "NULL",
-                                  (*it)["hmac"].is_string() ? (*it)["hmac"].get<std::string>() : "NULL",
-                                  (*it)["k"].is_string() ? (*it)["k"].get<std::string>() : "NULL",
-                                  (*it)["trashed"].is_boolean() ? (*it)["trashed"].get<int>() : -1 );
-            }
-            catch (...) {
-                throw;
-            }
-            items.push_back(item);
-        }
+    setup_filenames();
+
+    try {
+        File::read(filenames);
+    } catch (...) {
+        throw;
     }
 }
 
@@ -76,61 +48,121 @@ void Band::create_table() {
     sql_exec(SQL_CREATE_ITEMS);
 }
 
-void Band::insert_entry(BandEntry &item) {
-    int sz = snprintf(nullptr, 0, SQL_REPLACE_ITEMS_ENTRY,
-                      item.created,
-                      item.o.c_str(),
-                      item.tx,
-                      item.updated,
-                      item.uuid.c_str(),
-                      item.category.c_str(),
-                      item.d.c_str(),
-                      item.fave,
-                      item.folder.c_str(),
-                      item.hmac.c_str(),
-                      item.k.c_str(),
-                      item.trashed) + 1;
-    char *buf;
-    buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_REPLACE_ITEMS_ENTRY,
-             item.created,
-             item.o.c_str(),
-             item.tx,
-             item.updated,
-             item.uuid.c_str(),
-             item.category.c_str(),
-             item.d.c_str(),
-             item.fave,
-             item.folder.c_str(),
-             item.hmac.c_str(),
-             item.k.c_str(),
-             item.trashed);
+void Band::insert_item(BaseItem* base_item) {
+    BandItem* item = static_cast<BandItem*>(base_item);
+    sqlite3 *db;
+    int rc;
 
-    DBGVAR(item.uuid);
+    rc = sqlite3_open(DBFILE, &db);
 
-    sql_exec(buf);
-    free(buf);
-}
-
-void Band::insert_all_entries() {
-    for(auto it=items.begin(); it!=items.end(); ++it) {
-        insert_entry(*it);
+    if(rc){
+        std::ostringstream os;
+        os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
     }
+
+    sqlite3_stmt *stmt;
+    if ((rc = sqlite3_prepare_v2(db, SQL_REPLACE_ITEM, -1, &stmt, nullptr) != SQLITE_OK)) {
+        std::ostringstream os;
+        os << "libopvault: SQL prepare error - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    } else {
+        sqlite3_bind_int64(stmt, 1, item->created);
+        sqlite3_bind_text(stmt, 2, item->o.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 3, item->tx);
+        sqlite3_bind_int64(stmt, 4, item->updated);
+        sqlite3_bind_text(stmt, 5, item->uuid.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, item->category.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 7, item->d.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 8, item->fave);
+        sqlite3_bind_text(stmt, 9, item->folder.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 10, item->hmac.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 11, item->k.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 12, item->trashed);
+
+        int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            std::ostringstream os;
+            os << "libopvault: error replacing data in Folders table - error code: " << rc;
+            sqlite3_close(db);
+            throw std::runtime_error(os.str());
+        }
+
+        sqlite3_finalize(stmt);
+    }
+
+    sqlite3_close(db);
 }
 
-void Band::insert_all_entries(std::vector<BandEntry> &items) {
-    for(auto it=items.begin(); it!=items.end(); ++it) {
-        if (it->updateState) {
-            it->generate_hmac();
-            insert_entry(*it);
-            it->updateState = false;
+void Band::insert_items(std::vector<BandItem> &items) {
+    for(auto &item : items) {
+        if (item.updateState) {
+            item.generate_hmac();
+            insert_item(&item);
+            item.updateState = false;
+        } else {
+            insert_item(&item);
         }
     }
 }
 
-void Band::sync() {
-    //local changes: local.updated > local.tx
-    //remote changes: remote.tx > local.tx
+void Band::sync(std::vector<BandItem> &items) {
+    std::unordered_map<std::string, UserItem*> local_map;
+
+    for (auto &item : items) {
+        // Create a map with key uuid for local items
+        local_map.insert({item.uuid, &item});
+    }
+
+    setup_filenames();
+
+    try {
+        File::sync(filenames, local_map);
+    } catch (...) {
+        throw;
+    }
+
+    // New local items: sync new elements still in the map
+    if (!local_map.empty()) {
+        for (auto const &item : local_map) {
+            DBGMSG("new local item");
+            append(std::string("band_") + item.second->get_uuid()[0] + std::string(".js"), item.second);
+        }
+    }
+}
+
+BaseItem* Band::json2item(nlohmann::json &j) {
+  return new BandItem(
+      j["created"].is_number_integer() ? j["created"].get<long>() : -1,
+      j["o"].is_string() ? j["o"].get<std::string>() : "",
+      j["tx"].is_number_integer() ? j["tx"].get<long>() : -1,
+      j["updated"].is_number_integer() ? j["updated"].get<long>() : -1,
+      j["uuid"].is_string() ? j["uuid"].get<std::string>() : "",
+      j["category"].is_string() ? j["category"].get<std::string>() : "",
+      j["d"].is_string() ? j["d"].get<std::string>() : "",
+      j["fave"].is_number_integer() ? j["fave"].get<long>() : -1,
+      j["folder"].is_string() ? j["folder"].get<std::string>() : "",
+      j["hmac"].is_string() ? j["hmac"].get<std::string>() : "",
+      j["k"].is_string() ? j["k"].get<std::string>() : "",
+      j["trashed"].is_boolean() ? j["trashed"].get<int>() : j["trashed"].is_string() ? std::stoi(j["trashed"].get<std::string>()) : -1);
+}
+
+void Band::setup_filenames() {
+    if (filenames.empty()) {
+        for (int index = 0; index < BAND_NUM; ++index) {
+            filenames.push_back(std::string("band_") + BAND_INDEXES[index] + std::string(".js"));
+        }
+    }
+}
+
+void Band::update_tx(BaseItem* base_item) {
+    BandItem* item = static_cast<BandItem*>(base_item);
+    // update tx and hmac in db
+    item->tx = time(nullptr);
+    item->generate_hmac();
+    insert_item(item);
 }
 
 }

@@ -23,78 +23,104 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <sqlite3.h>
+
 #include "dbg.h"
 #include "vault.h"
 
 #include "profile.h"
 
-using json = nlohmann::json;
-
 namespace OPVault {
 
 void Profile::read() {
+    nlohmann::json j;
+
     try {
-        File::read("profile.js");
+        File::read("profile.js", j);
     }
     catch (...) {
         throw;
     }
-    profile = ProfileEntry( data["lastUpdatedBy"].is_string() ? data["lastUpdatedBy"].get<std::string>() : "NULL",
-                            data["updatedAt"].is_number_integer() ? data["updatedAt"].get<long>() : -1,
-                            data["profileName"].is_string() ? data["profileName"].get<std::string>() : "NULL",
-                            data["salt"].is_string() ? data["salt"].get<std::string>() : "NULL",
-                            data["passwordHint"].is_string() ? data["passwordHint"].get<std::string>() : "NULL",
-                            data["masterKey"].is_string() ? data["masterKey"].get<std::string>() : "NULL",
-                            data["iterations"].is_number_integer() ? data["iterations"].get<unsigned int>() : 0,
-                            data["uuid"].is_string() ? data["uuid"].get<std::string>() : "NULL",
-                            data["overviewKey"].is_string() ? data["overviewKey"].get<std::string>() : "NULL",
-                            data["createdAt"].is_number_integer() ? data["createdAt"].get<long>() : -1 );
+    insert_json(j);
 }
 
 int Profile::read_updatedAt() {
+    nlohmann::json j;
+
     try {
-        File::read("profile.js");
+        File::read("profile.js", j);
     }
     catch (...) {
         throw;
     }
-    return data["updatedAt"];
+    return j["updatedAt"];
 }
 
 void Profile::create_table() {
     sql_exec(SQL_CREATE_PROFILE);
 }
 
-void Profile::insert_entry() {
-    int sz = snprintf(nullptr, 0, SQL_INSERT_PROFILE_ENTRY,
-                      profile.lastUpdatedBy.c_str(),
-                      profile.updatedAt,
-                      profile.profileName.c_str(),
-                      profile.salt.c_str(),
-                      profile.passwordHint.c_str(),
-                      profile.masterKey.c_str(),
-                      profile.iterations,
-                      profile.uuid.c_str(),
-                      profile.overviewKey.c_str(),
-                      profile.createdAt) + 1;
-    char *buf;
-    buf = (char*) malloc((size_t) sz);
-    snprintf(buf, (size_t) sz, SQL_INSERT_PROFILE_ENTRY,
-             profile.lastUpdatedBy.c_str(),
-             profile.updatedAt,
-             profile.profileName.c_str(),
-             profile.salt.c_str(),
-             profile.passwordHint.c_str(),
-             profile.masterKey.c_str(),
-             profile.iterations,
-             profile.uuid.c_str(),
-             profile.overviewKey.c_str(),
-             profile.createdAt);
+void Profile::insert_item(BaseItem* base_item) {
+    ProfileItem* profile = static_cast<ProfileItem*>(base_item);
+    sqlite3 *db;
+    int rc;
 
-    DBGVAR(profile.uuid);
+    rc = sqlite3_open(DBFILE, &db);
 
-    sql_exec(buf);
-    free(buf);
+    if(rc){
+        std::ostringstream os;
+        os << "libopvault: can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    sqlite3_stmt *stmt;
+    if ((rc = sqlite3_prepare_v2(db, SQL_INSERT_PROFILE_ITEM, -1, &stmt, nullptr) != SQLITE_OK)) {
+        std::ostringstream os;
+        os << "libopvault: SQL prepare error - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    } else {
+        sqlite3_bind_text(stmt, 1, profile->lastUpdatedBy.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 2, profile->updatedAt);
+        sqlite3_bind_text(stmt, 3, profile->profileName.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 4, profile->salt.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 5, profile->passwordHint.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 6, profile->masterKey.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 7, profile->iterations);
+        sqlite3_bind_text(stmt, 8, profile->uuid.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 9, profile->overviewKey.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int64(stmt, 10, profile->createdAt);
+
+        int rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            std::ostringstream os;
+            os << "libopvault: error inserting data in Profile table - error code: " << rc;
+            sqlite3_close(db);
+            throw std::runtime_error(os.str());
+        }
+
+        sqlite3_finalize(stmt);
+    }
+
+    sqlite3_close(db);
+}
+
+BaseItem* Profile::json2item(nlohmann::json &j) {
+    return new ProfileItem(j["lastUpdatedBy"].is_string() ? j["lastUpdatedBy"].get<std::string>() : "",
+                           j["updatedAt"].is_number_integer() ? j["updatedAt"].get<long>() : -1,
+                           j["profileName"].is_string() ? j["profileName"].get<std::string>() : "",
+                           j["salt"].is_string() ? j["salt"].get<std::string>() : "",
+                           j["passwordHint"].is_string() ? j["passwordHint"].get<std::string>() : "",
+                           j["masterKey"].is_string() ? j["masterKey"].get<std::string>() : "",
+                           j["iterations"].is_number_integer() ? j["iterations"].get<unsigned int>() : 0,
+                           j["uuid"].is_string() ? j["uuid"].get<std::string>() : "",
+                           j["overviewKey"].is_string() ? j["overviewKey"].get<std::string>() : "",
+                           j["createdAt"].is_number_integer() ? j["createdAt"].get<long>() : -1);
+}
+
+void Profile::update_tx(BaseItem* base_item) {
+    // PROFILE SYNC IS NOT SUPPORTED
 }
 
 }

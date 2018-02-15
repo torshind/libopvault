@@ -23,13 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef FILE_H
-#define FILE_H
+#pragma once
 
 #include <string>
 
 #include "json.hpp"
 #include "const.h"
+#include "useritem.h"
 
 namespace OPVault {
 
@@ -37,18 +37,32 @@ class File
 {
 protected:
     File() {}
+    virtual ~File();
 
     static std::string directory;
 
-    nlohmann::json data;
-
+    void read(const std::string &filename, nlohmann::json &j);
     void read(const std::string &filename);
+    void read(const std::vector<std::string> &filenames);
+    void write(const std::string &filename, nlohmann::json &j);
+    void append(const std::string &filename, nlohmann::json &j);
+    void append(const std::string &filename, UserItem* user_item);
+    void sync(const std::string filename, std::unordered_map<std::string, UserItem*> &local_map);
+    void sync(const std::vector<std::string> &filenames, std::unordered_map<std::string, UserItem*> &local_map);
+
     void sql_exec(const char sql[]);
+    void sql_update_long(const std::string &table, const std::string &col, const std::string &uuid, long val);
+
+    void insert_json(nlohmann::json &j);
+    virtual BaseItem* json2item(nlohmann::json &j) = 0;
+    virtual void insert_item(BaseItem* base_item) = 0;
+    virtual void update_tx(BaseItem* base_item) = 0;
 
 public:
     void set_directory(const std::string &d) { directory = d; }
+
+private:
+    std::string get_prefix(const std::string &filename);
 };
 
 }
-
-#endif // FILE_H

@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef CONST_H
-#define CONST_H
+#pragma once
 
 #include <unordered_map>
 
@@ -55,6 +54,10 @@ const int BAND_NUM = 16;
 const char BAND_INDEXES[BAND_NUM] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
 
 const char DBFILE[] = "opvault.db";
+
+const std::string SQL_TABLE_ITEMS("Items");
+const std::string SQL_TABLE_FOLDERS("Folders");
+
 const char SQL_CREATE_PROFILE[] = "CREATE TABLE Profile (" \
                                   "lastUpdatedBy TEXT NOT NULL," \
                                   "updatedAt     INT  NOT NULL," \
@@ -67,8 +70,8 @@ const char SQL_CREATE_PROFILE[] = "CREATE TABLE Profile (" \
                                   "overviewKey   TEXT NOT NULL," \
                                   "createdAt     INT  NOT NULL );";
 
-const char SQL_INSERT_PROFILE_ENTRY[] = "INSERT INTO Profile (lastUpdatedBy, updatedAt, profileName, salt, passwordHint, masterKey, iterations, uuid, overviewKey, createdAt) " \
-                                        "VALUES ('%s', %ld, '%s', '%s', '%s', '%s', %u, '%s', '%s', %ld);";
+const char SQL_INSERT_PROFILE_ITEM[] = "INSERT INTO Profile (lastUpdatedBy, updatedAt, profileName, salt, passwordHint, masterKey, iterations, uuid, overviewKey, createdAt) " \
+                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 const char SQL_CREATE_ITEMS[] = "CREATE TABLE Items (" \
                                 "created  INT  NOT NULL," \
@@ -84,8 +87,8 @@ const char SQL_CREATE_ITEMS[] = "CREATE TABLE Items (" \
                                 "k        TEXT NOT NULL," \
                                 "trashed  INT  NOT NULL );";
 
-const char SQL_REPLACE_ITEMS_ENTRY[] = "INSERT OR REPLACE INTO Items (created, o, tx, updated, uuid, category, d, fave, folder, hmac, k, trashed) " \
-                                       "VALUES (%ld, '%s', %ld, %ld, '%s', '%s', '%s', %lu, '%s', '%s', '%s', %d);";
+const char SQL_REPLACE_ITEM[] = "INSERT OR REPLACE INTO Items (created, o, tx, updated, uuid, category, d, fave, folder, hmac, k, trashed) " \
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
                                   "created  INT  NOT NULL," \
@@ -94,8 +97,10 @@ const char SQL_CREATE_FOLDERS[] = "CREATE TABLE Folders (" \
                                   "updated  INT  NOT NULL," \
                                   "uuid     CHAR(32) PRIMARY KEY NOT NULL );";
 
-const char SQL_REPLACE_FOLDERS_ENTRY[] = "INSERT OR REPLACE INTO Folders (created, o, tx, updated, uuid) " \
-                                         "VALUES (%ld, '%s', %ld, %ld, '%s');";
+const char SQL_REPLACE_FOLDER[] = "INSERT OR REPLACE INTO Folders (created, o, tx, updated, uuid) " \
+                                  "VALUES (?, ?, ?, ?, ?);";
+
+const char SQL_UPDATE_LONG[] = "UPDATE %s SET %s = %ld WHERE uuid = '%s';";
 
 const char SQL_SELECT_PROFILE[] = "SELECT * from Profile";
 const char SQL_SELECT_FOLDERS[] = "SELECT * from Folders";
@@ -121,5 +126,3 @@ const std::unordered_map<std::string, std::string> CATEGORIES = { {"001", "Login
                                                                   {"109", "Router"},
                                                                   {"110", "Server"},
                                                                   {"111", "Email"} };
-
-#endif

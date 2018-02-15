@@ -23,11 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef FOLDERS_H
-#define FOLDERS_H
+#pragma once
 
 #include "file.h"
-#include "folderentry.h"
+#include "folderitem.h"
 
 namespace OPVault {
 
@@ -38,17 +37,15 @@ class Folder : public File
 protected:
     Folder() {}
 
-private:
-    std::vector<FolderEntry> folders;
+    virtual BaseItem* json2item(nlohmann::json &j);
+    virtual void insert_item(BaseItem* base_item);
+    virtual void update_tx(BaseItem* base_item);
 
 public:
     void read();
     void create_table();
-    void insert_entry(FolderEntry &folder);
-    void insert_all_entries();
-    void insert_all_entries(std::vector<FolderEntry> &folders);
+    void insert_folders(std::vector<FolderItem> &folders);
+    void sync(std::vector<FolderItem> &folders);
 };
 
 }
-
-#endif // FOLDERS_H

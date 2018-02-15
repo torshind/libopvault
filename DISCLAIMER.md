@@ -13,7 +13,7 @@ This software and its documentation:
 * could include technical or other mistakes, inaccuracies or typographical errors. The author may make changes to the software or documentation made available;
 * may be out of date, and the author makes no commitment to update such materials.
 
-The author assumes no responsibility for errors or ommissions in the software or documentation available.
+The author assumes no responsibility for errors or omissions in the software or documentation available.
 
 In no event shall the author be liable to you or any third parties for any special, punitive, incidental, indirect or consequential damages of any kind, or any damages whatsoever, including, without limitation, those resulting from loss of use, data or profits, whether or not the author has been advised of the possibility of such damages, and on any theory of liability, arising out of or in connection with the use of this software.
 

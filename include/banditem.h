@@ -23,58 +23,60 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef BANDENTRY_H
-#define BANDENTRY_H
+#pragma once
 
 #include <vector>
 
-#include "userentry.h"
+#include "useritem.h"
 
 namespace OPVault {
 
-class BandEntry : public UserEntry {
+class BandItem : public UserItem {
     friend class Vault;
     friend class Band;
 
 public:
-    BandEntry() {
-        fave = 0;
-        folder = "NULL";
+    BandItem() {
+        fave = -1;
+        folder = "";
         trashed = -1;
         updateState = false;
     }
 
-    std::string get_category() { return category; }
-    unsigned long get_fave() { return fave; }
-    std::string get_folder() { return folder; }
+    std::string& get_category() { return category; }
+    long get_fave() { return fave; }
+    std::string& get_folder() { return folder; }
     int get_trashed() { return trashed; }
 
     void set_category(const std::string &_category);
     void set_data(const std::string &_d);
-    void set_fave(const unsigned long _fave);
+    void set_fave(const long _fave);
     void set_folder(const std::string &_folder);
     void set_trashed(const int _trashed);
 
     void decrypt_data(std::string& data);
 
+protected:
+    virtual void to_json(nlohmann::json &j);
+
 private:
-    BandEntry(long _created,
-              std::string _o,
-              long _tx,
-              long _updated,
-              std::string _uuid,
-              std::string _category,
-              std::string _d,
-              unsigned long _fave,
-              std::string _folder,
-              std::string _hmac,
-              std::string _k,
-              int _trashed) :
-        UserEntry(_created,
-                  _o,
-                  _tx,
-                  _updated,
-                  _uuid),
+    BandItem(long _created,
+             std::string _o,
+             long _tx,
+             long _updated,
+             std::string _uuid,
+             std::string _category,
+             std::string _d,
+             long _fave,
+             std::string _folder,
+             std::string _hmac,
+             std::string _k,
+             int _trashed) :
+        UserItem(_created,
+                 _o,
+                 _tx,
+                 _updated,
+                 _uuid),
         category(_category),
         d(_d),
         fave(_fave),
@@ -88,20 +90,17 @@ private:
 
     std::string category;
     std::string d;
-    unsigned long fave;
+    long fave;
     std::string folder;
     std::string hmac;
     std::string k;
     int trashed;
 
-    std::string hmac_in_str();
+    std::string get_hmac_input_str();
     void verify();
-    void verify_key();
     void decrypt_key(CryptoPP::SecByteBlock &key);
     void init();
     void generate_hmac();
 };
 
 }
-
-#endif // BANDENTRY_H

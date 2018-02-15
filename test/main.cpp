@@ -24,63 +24,113 @@ SOFTWARE.
 */
 
 #include <iostream>
+#include <experimental/filesystem>
+#include <sqlite3.h>
 
 #include "vault.h"
 #include "profile.h"
 #include "folder.h"
 #include "band.h"
-#include "baseentry.h"
+#include "baseitem.h"
+
+
+const char SQL_UPDATE_LONG_ALL[] = "UPDATE %s SET %s = %ld;";
 
 using namespace std;
 using namespace OPVault;
 
+void sql_exec(const char sql[]) {
+    sqlite3 *db;
+    char *zErrMsg = nullptr;
+    int rc;
+
+    rc = sqlite3_open(DBFILE, &db);
+
+    if(rc){
+        std::ostringstream os;
+        os << "Can't open database: " << sqlite3_errmsg(db) << " - error code: " << rc;
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    rc = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
+
+    if(rc != SQLITE_OK){
+        std::ostringstream os;
+        os << "SQL error: " << zErrMsg << " - error code: " << rc;
+        sqlite3_free(zErrMsg);
+        sqlite3_close(db);
+        throw std::runtime_error(os.str());
+    }
+
+    sqlite3_free(zErrMsg);
+    sqlite3_close(db);
+
+}
+
+void sql_update_long(const std::string &table, const std::string &col, long val) {
+    int sz = snprintf(nullptr, 0, SQL_UPDATE_LONG_ALL,
+                      table.c_str(),
+                      col.c_str(),
+                      val) + 1;
+    char *buf;
+    buf = (char*) malloc((size_t) sz);
+    snprintf(buf, (size_t) sz, SQL_UPDATE_LONG_ALL,
+             table.c_str(),
+             col.c_str(),
+             val);
+
+    sql_exec(buf);
+    free(buf);
+}
+
 static void get_items(const Vault &vault) {
-    vector<BandEntry> items;
+    vector<BandItem> items;
 
     vault.get_items(items);
-    for(auto it=items.begin(); it!=items.end(); ++it) {
-        cout << "Item " << it->get_uuid() << endl;
+    for(auto &item : items) {
+        cout << "Item " << item.get_uuid() << endl;
         string str;
-        it->decrypt_overview(str);
+        item.decrypt_overview(str);
         cout << "Overview: " << str << endl;
-        it->decrypt_data(str);
+        item.decrypt_data(str);
         cout << "Data: " << str << endl;
-        cout << "Category: " << it->get_category() << endl;
-        cout << "Fave: " << it->get_fave() << endl;
-        cout << "Folder: " << it->get_folder() << endl;
-        cout << "Trashed: " << it->get_trashed() << endl;
+        cout << "Category: " << item.get_category() << endl;
+        cout << "Fave: " << item.get_fave() << endl;
+        cout << "Folder: " << item.get_folder() << endl;
+        cout << "Trashed: " << item.get_trashed() << endl;
     }
 
 }
 
 static void get_folders(const Vault &vault) {
-    vector<FolderEntry> folders;
+    vector<FolderItem> folders;
 
     vault.get_folders(folders);
-    for(auto it=folders.begin(); it!=folders.end(); ++it) {
-        cout << "Folder " << it->get_uuid() << endl;
+    for(auto &folder : folders) {
+        cout << "Folder " << folder.get_uuid() << endl;
         string str;
-        it->decrypt_overview(str);
+        folder.decrypt_overview(str);
         cout << "Overview: " << str << endl;
     }
 }
 
 static void get_items_folder(const Vault &vault) {
-    vector<FolderEntry> folders;
-    vector<BandEntry> items;
+    vector<FolderItem> folders;
+    vector<BandItem> items;
 
     vault.get_folders(folders);
 
-    for(auto it1=folders.begin(); it1!=folders.end(); ++it1) {
-        cout << "Folder " << it1->get_uuid() << endl;
+    for(auto &folder : folders) {
+        cout << "Folder " << folder.get_uuid() << endl;
         items.clear();
-        vault.get_items_folder(it1->get_uuid(), items);
-        for(auto it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->get_uuid() << endl;
+        vault.get_items_folder(folder.get_uuid(), items);
+        for(auto &item : items) {
+            cout << "Item " << item.get_uuid() << endl;
             string str;
-            it2->decrypt_overview(str);
+            item.decrypt_overview(str);
             cout << "Overview: " << str << endl;
-            it2->decrypt_data(str);
+            item.decrypt_data(str);
             cout << "Data: " << str << endl;
         }
     }
@@ -88,18 +138,18 @@ static void get_items_folder(const Vault &vault) {
 }
 
 static void get_items_category(const Vault &vault) {
-    vector<BandEntry> items;
+    vector<BandItem> items;
 
-    for(auto it1=CATEGORIES.begin(); it1!=CATEGORIES.end(); ++it1) {
-        cout << "Category " << it1->second << endl;
+    for(auto &cat : CATEGORIES) {
+        cout << "Category " << cat.second << endl;
         items.clear();
-        vault.get_items_category(it1->first, items);
-        for(auto it2=items.begin(); it2!=items.end(); ++it2) {
-            cout << "Item " << it2->get_uuid() << endl;
+        vault.get_items_category(cat.first, items);
+        for(auto &item : items) {
+            cout << "Item " << item.get_uuid() << endl;
             string str;
-            it2->decrypt_overview(str);
+            item.decrypt_overview(str);
             cout << "Overview: " << str << endl;
-            it2->decrypt_data(str);
+            item.decrypt_data(str);
             cout << "Data: " << str << endl;
         }
     }
@@ -110,6 +160,7 @@ int main(int argc, char *argv[])
 {
     string master_password = u8"freddy";
     string cloud_data_dir = "./onepassword_data/default";
+    string cloud_sync_test_data_dir = "./onepassword_data/sync_test";
     string local_data_dir = "./";
 
     {
@@ -134,41 +185,41 @@ int main(int argc, char *argv[])
         // OPEN VAULT
         Vault vault(cloud_data_dir, local_data_dir, master_password);
 
-        vector<FolderEntry> folders;
-        vector<BandEntry> items;
+        vector<FolderItem> folders;
+        vector<BandItem> items;
 
         // INSERT NEW ITEMS
         items.clear();
-        BandEntry item1;
+        BandItem item1;
         item1.set_category("001");
         items.push_back(item1);
-        BandEntry item2;
+        BandItem item2;
         item2.set_data("{DATA2}");
         items.push_back(item2);
-        BandEntry item3;
+        BandItem item3;
         item3.set_folder("FOLDER3");
         items.push_back(item3);
-        BandEntry item4;
+        BandItem item4;
         item4.set_overview("{OVERVIEW4}");
         items.push_back(item4);
-        BandEntry item5;
+        BandItem item5;
         item5.set_fave(5000);
         items.push_back(item5);
-        BandEntry item6;
+        BandItem item6;
         item6.set_trashed(1);
         items.push_back(item6);
-        BandEntry item7;
+        BandItem item7;
         item7.set_category("099");
         item7.set_data("{DATA7}");
         item7.set_overview("{OVERVIEW7}");
         items.push_back(item7);
-        vault.set_items(items);
+        vault.insert_items(items);
 
         // INSERT NEW FOLDER
-        FolderEntry folder;
+        FolderItem folder;
         folder.set_overview("{\"title\":\"Mordor\"}");
         folders.push_back(folder);
-        vault.set_folders(folders);
+        vault.insert_folders(folders);
 
         // CHECK NEW DATA
         get_folders(vault);
@@ -193,15 +244,90 @@ int main(int argc, char *argv[])
         items[6].set_data("{DATA7.7}");
         items[6].set_overview("{OVERVIEW7.7}");
 
-        vault.set_items(items);
+        vault.insert_items(items);
 
         // CHECK MODIFIED DATA
         get_folders(vault);
         get_items(vault);
     }
 
+    std::experimental::filesystem::copy(cloud_data_dir, cloud_sync_test_data_dir, std::experimental::filesystem::copy_options::recursive);
+
+    {
+        // SYNC TEST
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
     // RESET LOCAL DB
     remove("./opvault.db");
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET UPDATED TO FUTURE TO FORCE UPDATE TO CLOUD
+    sql_update_long("Items", "updated", LONG_MAX);
+    sql_update_long("Folders", "updated", LONG_MAX);
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET TX TO 0 TO FORCE MERGE FROM CLOUD
+    sql_update_long("Items", "tx", 0);
+    sql_update_long("Folders", "tx", 0);
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
+
+    {
+        // OPEN SYNCED VAULT
+        Vault vault(cloud_sync_test_data_dir, local_data_dir, master_password);
+
+        // CHECK SYNCED DATA
+        get_folders(vault);
+        get_items(vault);
+    }
+
+    // RESET LOCAL DB
+    remove("./opvault.db");
+    // RESET SYNCED DATA
+    std::experimental::filesystem::remove_all(cloud_sync_test_data_dir);
 
     return 0;
 }

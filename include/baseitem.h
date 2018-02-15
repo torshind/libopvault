@@ -23,8 +23,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "folderentry.h"
+#pragma once
+
+#include <string>
+#include <cryptopp/secblock.h>
 
 namespace OPVault {
+
+class BaseItem
+{
+protected:
+    BaseItem() {}
+
+    static CryptoPP::SecByteBlock derived_key;
+    static CryptoPP::SecByteBlock overview_key;
+    static CryptoPP::SecByteBlock master_key;
+
+    void verify_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key);
+    void decrypt_opdata(const std::string &encoded_opdata, const CryptoPP::SecByteBlock &key, std::string &plaintext);
+    void encrypt_opdata(const std::string &plaintext, const CryptoPP::SecByteBlock &iv, const CryptoPP::SecByteBlock &key, std::string &encoded_opdata);
+};
 
 }

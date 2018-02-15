@@ -23,54 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <cryptopp/osrng.h>
-
-#include <uuid/uuid.h>
-
-#include "userentry.h"
-
-using namespace CryptoPP;
+#include "folderitem.h"
 
 namespace OPVault {
 
-void UserEntry::decrypt_overview(std::string& overview) {
-    if (!o.empty()) {
-        decrypt_opdata(o, overview_key, overview);
-    }
-}
+void FolderItem::to_json(nlohmann::json &j) {
+    nlohmann::json j_item;
+    j_item["created"]  = created;
+    j_item["overview"] = o;
+    j_item["tx"]       = tx;
+    j_item["updated"]  = updated;
+    j_item["uuid"]     = uuid;
 
-void UserEntry::init() {
-    created = time(nullptr);
-
-    // Generate UUID
-    uuid_t uuid_bin;
-    char uuid_str[37];
-
-    uuid_generate(uuid_bin);
-    uuid_unparse_upper(uuid_bin, uuid_str);
-    uuid = std::string(uuid_str);
-    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
-}
-
-void UserEntry::set_overview(const std::string &_o) {
-    updated = time(nullptr);
-    updateState = true;
-    if (uuid.empty()) {
-        init();
-    }
-
-    SecByteBlock iv;
-
-    // Generate iv
-    AutoSeededRandomPool prng;
-    iv = SecByteBlock(AES::BLOCKSIZE);
-    prng.GenerateBlock(iv, AES::BLOCKSIZE);
-
-    if (!o.empty()) {
-        o.clear();
-    }
-
-    encrypt_opdata(_o, iv, overview_key, o);
+    j[uuid] = j_item;
 }
 
 }
