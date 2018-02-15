@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef FILE_H
-#define FILE_H
+#pragma once
 
 #include <string>
 
@@ -67,5 +66,3 @@ private:
 };
 
 }
-
-#endif // FILE_H

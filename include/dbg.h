@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef DBG_H
-#define DBG_H
+#pragma once
 
 #include <iostream>
 
@@ -48,5 +47,3 @@ SOFTWARE.
 #define DBGMSG(x) do {} while (0)
 
 #endif
-
-#endif // DBG_H

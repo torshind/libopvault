@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef BAND_H
-#define BAND_H
+#pragma once
 
 #include "file.h"
 #include "banditem.h"
@@ -55,5 +54,3 @@ private:
 };
 
 }
-
-#endif // BAND_H

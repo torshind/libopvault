@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef PROFILEENTRY_H
-#define PROFILEENTRY_H
+#pragma once
 
 #include "baseitem.h"
 
@@ -80,5 +79,3 @@ private:
 };
 
 }
-
-#endif // PROFILEENTRY_H

@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef FOLDERS_H
-#define FOLDERS_H
+#pragma once
 
 #include "file.h"
 #include "folderitem.h"
@@ -50,5 +49,3 @@ public:
 };
 
 }
-
-#endif // FOLDERS_H

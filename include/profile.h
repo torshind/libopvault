@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef PROFILE_H
-#define PROFILE_H
+#pragma once
 
 #include "profileitem.h"
 
@@ -49,5 +48,3 @@ public:
 };
 
 }
-
-#endif // PROFILE_H

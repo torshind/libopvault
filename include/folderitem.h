@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef FOLDERENTRY_H
-#define FOLDERENTRY_H
+#pragma once
 
 #include "useritem.h"
 
@@ -54,5 +53,3 @@ private:
 };
 
 }
-
-#endif // FOLDERENTRY_H

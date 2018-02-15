@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef BASEENTRY_H
-#define BASEENTRY_H
+#pragma once
 
 #include <string>
 #include <cryptopp/secblock.h>
@@ -46,5 +45,3 @@ protected:
 };
 
 }
-
-#endif // BASEENTRY_H

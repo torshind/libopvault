@@ -32,8 +32,6 @@ SOFTWARE.
 
 #include "band.h"
 
-using json = nlohmann::json;
-
 namespace OPVault {
 
 void Band::read() {
@@ -135,7 +133,7 @@ void Band::sync(std::vector<BandItem> &items) {
     }
 }
 
-BaseItem* Band::json2item(json &j) {
+BaseItem* Band::json2item(nlohmann::json &j) {
   return new BandItem(
       j["created"].is_number_integer() ? j["created"].get<long>() : -1,
       j["o"].is_string() ? j["o"].get<std::string>() : "",

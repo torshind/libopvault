@@ -36,8 +36,6 @@ SOFTWARE.
 
 using namespace CryptoPP;
 
-using json = nlohmann::json;
-
 namespace OPVault {
 
 std::string File::directory;
@@ -72,7 +70,7 @@ void File::read(const std::string &filename, nlohmann::json &j) {
     }
 
     try {
-        j = json::parse(file_string);
+        j = nlohmann::json::parse(file_string);
     }
     catch (...) {
         throw;
@@ -185,7 +183,7 @@ void File::append(const std::string &filename, nlohmann::json &j) {
 }
 
 void File::append(const std::string &filename, UserItem *user_item) {
-    json j;
+    nlohmann::json j;
 
     update_tx(user_item);
     // append new element to file

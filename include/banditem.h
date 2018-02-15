@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef BANDENTRY_H
-#define BANDENTRY_H
+#pragma once
 
 #include <vector>
 
@@ -105,5 +104,3 @@ private:
 };
 
 }
-
-#endif // BANDENTRY_H

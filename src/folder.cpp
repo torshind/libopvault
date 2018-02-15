@@ -31,8 +31,6 @@ SOFTWARE.
 
 #include "folder.h"
 
-using json = nlohmann::json;
-
 namespace OPVault {
 
 void Folder::read() {

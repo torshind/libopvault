@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef VAULT_H
-#define VAULT_H
+#pragma once
 
 #include <vector>
 
@@ -58,5 +57,3 @@ public:
 };
 
 }
-
-#endif // VAULT_H

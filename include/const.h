@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef CONST_H
-#define CONST_H
+#pragma once
 
 #include <unordered_map>
 
@@ -127,5 +126,3 @@ const std::unordered_map<std::string, std::string> CATEGORIES = { {"001", "Login
                                                                   {"109", "Router"},
                                                                   {"110", "Server"},
                                                                   {"111", "Email"} };
-
-#endif

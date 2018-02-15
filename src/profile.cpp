@@ -30,8 +30,6 @@ SOFTWARE.
 
 #include "profile.h"
 
-using json = nlohmann::json;
-
 namespace OPVault {
 
 void Profile::read() {
