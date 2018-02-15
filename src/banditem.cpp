@@ -40,14 +40,22 @@ using namespace CryptoPP;
 
 namespace OPVault {
 
-void BandItem::verify_key() {
-    // TODO: verify key using master mac key
-}
-
 void BandItem::decrypt_key(SecByteBlock &key) {
     std::string encrypted_key;
     StringSource(k, true, new Base64Decoder(new StringSink(encrypted_key)));
 
+    // Verify
+    HMAC<SHA256> hmac(master_key.data()+ENC_KEY_LENGTH, MAC_KEY_LENGTH);
+    const int flags = HashVerificationFilter::THROW_EXCEPTION | HashVerificationFilter::HASH_AT_END;
+
+    try {
+        StringSource(encrypted_key, true, new HashVerificationFilter(hmac, nullptr, flags));
+    }
+    catch (...) {
+        throw std::invalid_argument("libopvault: wrong password");
+    }
+
+    // Decrypt
     SecByteBlock iv(reinterpret_cast<const unsigned char *> (encrypted_key.data()), AES::BLOCKSIZE);
 
     std::string ciphertext = std::string(encrypted_key.data()+AES::BLOCKSIZE, ITEM_KEY_LENGTH);

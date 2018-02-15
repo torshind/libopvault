@@ -99,7 +99,6 @@ private:
 
     std::string get_hmac_input_str();
     void verify();
-    void verify_key();
     void decrypt_key(CryptoPP::SecByteBlock &key);
     void init();
     void generate_hmac();
